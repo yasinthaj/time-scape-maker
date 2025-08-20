@@ -211,7 +211,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
   return (
     <>
-      {/* Main task bar with normal positioning */}
+      {/* Main task bar */}
       <div
         data-task-id={task.id}
         className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'}`}
@@ -220,12 +220,12 @@ const TaskBar: React.FC<TaskBarProps> = ({
           width: Math.max(minWidth, taskWidth),
           top: rowIndex * 48 + 8,
         }}
-        onMouseEnter={() => {
-          console.log('🖱️ HOVER ENTER:', task.name);
+        onMouseOver={() => {
+          console.log('🖱️ MOUSE OVER:', task.name);
           onHover(task.id);
         }}
-        onMouseLeave={() => {
-          console.log('🖱️ HOVER LEAVE:', task.name);
+        onMouseOut={() => {
+          console.log('🖱️ MOUSE OUT:', task.name);
           onHover(null);
           setHoveredEdge(null);
         }}
@@ -284,7 +284,32 @@ const TaskBar: React.FC<TaskBarProps> = ({
         </div>
       </div>
 
-      {/* Hover Indicators - Outside the main task bar to prevent flickering */}
+      {/* ALWAYS VISIBLE DEBUG INDICATORS */}
+      <div
+        className="absolute w-2 h-2 bg-blue-500 pointer-events-none z-50"
+        style={{
+          left: Math.max(0, taskStartPos) - 10,
+          top: rowIndex * 48 + 8 + 12,
+        }}
+      />
+      <div
+        className="absolute w-2 h-2 bg-green-500 pointer-events-none z-50"
+        style={{
+          left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) + 10,
+          top: rowIndex * 48 + 8 + 12,
+        }}
+      />
+      <div
+        className="absolute bg-purple-400 text-white text-xs px-1 pointer-events-none z-50"
+        style={{
+          left: Math.max(0, taskStartPos),
+          top: rowIndex * 48 - 15,
+        }}
+      >
+        {task.name} (hover: {isHovered ? 'YES' : 'NO'})
+      </div>
+
+      {/* Hover Indicators */}
       {isHovered && (
         <>
           {/* Left Vertical Line */}
@@ -565,22 +590,6 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               ))}
             </div>
             
-            {/* Debug: Dependencies count and controls */}
-            <div className="absolute top-2 right-2 z-50 space-y-1">
-              <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-xs">
-                Dependencies: {dependencies.length} | Available Tasks: {tasks.length}
-              </div>
-              <button 
-                onClick={() => {
-                  console.log('🗑️ CLEARING ALL DEPENDENCIES');
-                  setDependencies([]);
-                }}
-                className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
-              >
-                Clear All Dependencies
-              </button>
-            </div>
-
             {/* Task bars */}
             <div className="absolute" style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}>
                {tasks.map((task, index) => (
@@ -599,6 +608,22 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                ))}
             </div>
             
+            {/* Debug: Dependencies count and controls */}
+            <div className="absolute top-2 right-2 z-50 space-y-1">
+              <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-xs">
+                Dependencies: {dependencies.length} | Available Tasks: {tasks.length}
+              </div>
+              <button 
+                onClick={() => {
+                  console.log('🗑️ CLEARING ALL DEPENDENCIES');
+                  setDependencies([]);
+                }}
+                className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+              >
+                Clear All Dependencies
+              </button>
+            </div>
+
             {/* Debug: Dependencies list */}
             {dependencies.length > 0 && (
               <div className="absolute top-10 right-2 bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs z-50 max-w-xs">
