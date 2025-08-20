@@ -417,6 +417,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   zoomLevel, 
   onTaskUpdate 
 }) => {
+  console.log('📊 TimelineGrid is rendering with', tasks.length, 'tasks');
   const scrollRef = useRef<HTMLDivElement>(null);
   const [hasScrolledToToday, setHasScrolledToToday] = useState(false);
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
