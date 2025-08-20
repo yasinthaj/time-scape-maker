@@ -214,11 +214,12 @@ const TaskBar: React.FC<TaskBarProps> = ({
       {/* Main task bar */}
       <div
         data-task-id={task.id}
-        className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'}`}
+        className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} border-4 border-red-500`}
         style={{
           left: Math.max(0, taskStartPos),
           width: Math.max(minWidth, taskWidth),
           top: rowIndex * 48 + 8,
+          backgroundColor: 'red !important',
         }}
         onMouseOver={() => {
           console.log('🖱️ MOUSE OVER:', task.name);
