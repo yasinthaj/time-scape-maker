@@ -35,8 +35,8 @@ const TaskBar: React.FC<TaskBarProps> = ({
   const taskWidth = Math.max(pixelsPerDay, taskEndPos - taskStartPos + pixelsPerDay);
   const minWidth = pixelsPerDay; // Minimum 1 day
 
-  // Only render if task is visible in the current date range
-  if (taskStartPos > endDate.getTime() || taskEndPos < startDate.getTime()) {
+  // Only render if task overlaps with the visible date range
+  if (task.endDate < startDate || task.startDate > endDate) {
     return null;
   }
 
@@ -124,45 +124,42 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
   return (
     <div
-      className={`absolute h-8 rounded-md border border-white/20 shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.02] group cursor-pointer ${getStatusColor(task.status)} ${isDragging ? 'z-10 scale-105 shadow-xl' : ''}`}
+      className={`absolute h-6 rounded-sm shadow-sm transition-all duration-200 hover:shadow-md hover:z-10 group cursor-pointer ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : ''}`}
       style={{
         left: Math.max(0, taskStartPos),
         width: Math.max(minWidth, taskWidth),
-        top: rowIndex * 48 + 10, // 48px row height + 10px margin for better visual separation
+        top: rowIndex * 48 + 12, // Center in the 48px row
       }}
       onMouseDown={(e) => handleMouseDown(e, 'move')}
       title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
     >
       {/* Resize handle - left */}
       <div
-        className="absolute left-0 top-0 h-full w-3 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/30 transition-all duration-200 rounded-l-md"
+        className="absolute left-0 top-0 h-full w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/30 transition-all duration-200"
         onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
       />
       
-      {/* Progress indicator */}
+      {/* Progress indicator background */}
       {task.progress !== undefined && task.progress > 0 && (
         <div 
-          className="absolute top-0 left-0 h-full bg-white/20 rounded-l-md transition-all duration-300"
+          className="absolute top-0 left-0 h-full bg-white/25 transition-all duration-300"
           style={{ width: `${task.progress}%` }}
         />
       )}
       
       {/* Task content */}
-      <div className="px-3 py-1 h-full flex items-center text-white text-sm font-medium truncate relative z-10">
+      <div className="px-2 py-1 h-full flex items-center text-white text-xs font-medium relative z-10">
         <span className="truncate">{task.name}</span>
         {task.progress !== undefined && task.progress > 0 && (
-          <span className="ml-2 text-xs opacity-90 font-normal">({task.progress}%)</span>
+          <span className="ml-1 text-xs opacity-80">({task.progress}%)</span>
         )}
       </div>
       
       {/* Resize handle - right */}
       <div
-        className="absolute right-0 top-0 h-full w-3 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/30 transition-all duration-200 rounded-r-md"
+        className="absolute right-0 top-0 h-full w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/30 transition-all duration-200"
         onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
       />
-
-      {/* Status indicator dot */}
-      <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(task.status)}`} />
     </div>
   );
 };
@@ -321,7 +318,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             </div>
             
             {/* Task bars */}
-            <div className="relative" style={{ height: Math.max(tasks.length * 48, 400) }}>
+            <div className="relative" style={{ height: Math.max(tasks.length * 48, 400), minHeight: '100%' }}>
               {tasks.map((task, index) => (
                 <TaskBar
                   key={task.id}
