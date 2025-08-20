@@ -590,8 +590,11 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                    onTaskUpdate={onTaskUpdate}
                    onDependencyCreate={handleDependencyCreate}
                    rowIndex={index}
-                   isHovered={hoveredTask === task.id}
-                   onHover={setHoveredTask}
+                    isHovered={hoveredTask === task.id}
+                    onHover={(taskId) => {
+                      console.log('🎯 TimelineGrid received hover event:', taskId);
+                      setHoveredTask(taskId);
+                    }}
                  />
                ))}
             </div>
