@@ -595,45 +595,29 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 height: '100%'
               }}
             >
-              {/* Arrow marker definition - only once */}
+              {/* Arrow marker definition */}
               <defs>
                 <marker
                   id="dependency-arrowhead"
-                  markerWidth="10"
-                  markerHeight="7"
-                  refX="9"
-                  refY="3.5"
+                  markerWidth="8"
+                  markerHeight="6"
+                  refX="7"
+                  refY="3"
                   orient="auto"
                 >
                   <polygon
-                    points="0 0, 10 3.5, 0 7"
-                    fill="hsl(var(--primary))"
+                    points="0 0, 8 3, 0 6"
+                    fill="hsl(var(--muted-foreground))"
                   />
                 </marker>
               </defs>
               
-              {/* Debug rect to test SVG visibility */}
-              <rect x="10" y="10" width="150" height="30" fill="rgba(0,255,0,0.3)" stroke="green" strokeWidth="2" />
-              <text x="15" y="30" fill="green" fontSize="14" fontWeight="bold">SVG OVERLAY WORKING</text>
-              
-              {/* Dependencies counter */}
-              <text x="10" y="60" fill="purple" fontSize="14" fontWeight="bold">
-                Dependencies: {dependencies.length}
-              </text>
-              
-              {dependencies.map((dependency, index) => {
-                console.log(`🎨 Rendering dependency ${index + 1}/${dependencies.length}:`, dependency);
-                
+              {dependencies.map((dependency) => {
                 const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
                 const toTask = tasks.find(t => t.id === dependency.toTaskId);
                 
                 if (!fromTask || !toTask) {
-                  console.log('❌ Missing task for dependency:', dependency, { fromTask: !!fromTask, toTask: !!toTask });
-                  return (
-                    <text key={dependency.id} x="200" y={80 + index * 20} fill="red" fontSize="12" fontWeight="bold">
-                      ERROR: {dependency.id} - Missing tasks
-                    </text>
-                  );
+                  return null;
                 }
                 
                 const fromIndex = tasks.findIndex(t => t.id === dependency.fromTaskId);
@@ -647,47 +631,28 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 const fromY = headerHeight + fromIndex * 48 + 24; // Center of task + header
                 const toY = headerHeight + toIndex * 48 + 24; // Center of task + header
                 
-                const startX = fromTaskEndPos + 5; // Small offset from end of task
-                const endX = Math.max(toTaskStartPos - 5, startX + 30); // Small offset to start of task
+                const startX = fromTaskEndPos + 2; // Small offset from end of task
+                const endX = Math.max(toTaskStartPos - 2, startX + 20); // Small offset to start of task
                 
-                // Simple straight line for now to test
-                const pathData = `M ${startX} ${fromY} L ${endX} ${toY}`;
-
-                console.log('🎨 Arrow coordinates:', {
-                  dependency: dependency.id,
-                  fromTask: fromTask.name,
-                  toTask: toTask.name,
-                  fromY,
-                  toY,
-                  startX,
-                  endX,
-                  headerHeight
-                });
+                // Create clean curved path like ClickUp
+                const controlX1 = startX + Math.abs(endX - startX) * 0.3;
+                const controlY1 = fromY;
+                const controlX2 = endX - Math.abs(endX - startX) * 0.3;
+                const controlY2 = toY;
+                
+                const pathData = `M ${startX} ${fromY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${endX} ${toY}`;
 
                 return (
-                  <g key={dependency.id}>
-                    {/* Large debug circles to make them visible */}
-                    <circle cx={startX} cy={fromY} r="8" fill="blue" stroke="white" strokeWidth="2" opacity="0.8" />
-                    <circle cx={endX} cy={toY} r="8" fill="green" stroke="white" strokeWidth="2" opacity="0.8" />
-                    
-                    {/* Thick arrow line */}
-                    <path
-                      d={pathData}
-                      stroke="hsl(var(--primary))"
-                      strokeWidth="4"
-                      fill="none"
-                      markerEnd="url(#dependency-arrowhead)"
-                      opacity="0.9"
-                    />
-                    
-                    {/* Clear debug text */}
-                    <text x={startX + 12} y={fromY - 5} fill="blue" fontSize="12" fontWeight="bold">
-                      FROM: {dependency.fromTaskId}
-                    </text>
-                    <text x={endX + 12} y={toY + 15} fill="green" fontSize="12" fontWeight="bold">
-                      TO: {dependency.toTaskId}
-                    </text>
-                  </g>
+                  <path
+                    key={dependency.id}
+                    d={pathData}
+                    stroke="hsl(var(--muted-foreground))"
+                    strokeWidth="1.5"
+                    fill="none"
+                    markerEnd="url(#dependency-arrowhead)"
+                    opacity="0.7"
+                    className="transition-opacity hover:opacity-100"
+                  />
                 );
               })}
             </svg>
