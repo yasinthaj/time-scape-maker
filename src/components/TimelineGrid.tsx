@@ -226,31 +226,31 @@ const TaskBar: React.FC<TaskBarProps> = ({
       >
         {/* Left Edge Area */}
         <div
-          className="absolute left-0 top-0 h-full w-4 flex items-center justify-start z-30"
+          className="absolute left-0 top-0 h-full w-8 flex items-center justify-start z-30 cursor-ew-resize"
           onMouseEnter={() => setHoveredEdge('start')}
           onMouseLeave={() => setHoveredEdge(null)}
+          onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
         >
-          {/* Resize Handle */}
+          {/* Prominent Vertical Line Indicator */}
           <div
-            className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
-              hoveredEdge === 'start' ? 'opacity-100 scale-110' : 'opacity-0'
+            className={`absolute left-0 top-0 w-1 h-full bg-primary/80 transition-all duration-200 ${
+              hoveredEdge === 'start' ? 'opacity-100 shadow-lg' : 'opacity-0'
             }`}
-            onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
           />
           
-          {/* Edge Line + Arrow for resize indication */}
+          {/* Resize Handle Dot */}
           <div
-            className={`absolute -left-4 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+            className={`absolute left-0.5 top-1/2 transform -translate-y-1/2 w-2 h-6 bg-primary border border-background rounded-sm shadow-md transition-all duration-200 ${
+              hoveredEdge === 'start' ? 'opacity-100 scale-110' : 'opacity-0'
+            }`}
+          />
+          
+          {/* Visual Guide Lines */}
+          <div
+            className={`absolute -left-2 top-0 w-0.5 h-full bg-primary/40 transition-all duration-200 ${
               hoveredEdge === 'start' ? 'opacity-100' : 'opacity-0'
             }`}
-          >
-            <div className="flex items-center">
-              <svg width="12" height="8" className="text-primary">
-                <path d="M8 4L4 2v4l4-2z" fill="currentColor" />
-              </svg>
-              <div className="w-3 h-0.5 bg-primary"></div>
-            </div>
-          </div>
+          />
         </div>
 
         {/* Dependency Dot - Left (Completely outside strip) */}
@@ -269,31 +269,31 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
         {/* Right Edge Area */}
         <div
-          className="absolute right-0 top-0 h-full w-4 flex items-center justify-end z-30"
+          className="absolute right-0 top-0 h-full w-8 flex items-center justify-end z-30 cursor-ew-resize"
           onMouseEnter={() => setHoveredEdge('end')}
           onMouseLeave={() => setHoveredEdge(null)}
+          onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
         >
-          {/* Resize Handle */}
+          {/* Prominent Vertical Line Indicator */}
           <div
-            className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
-              hoveredEdge === 'end' ? 'opacity-100 scale-110' : 'opacity-0'
+            className={`absolute right-0 top-0 w-1 h-full bg-primary/80 transition-all duration-200 ${
+              hoveredEdge === 'end' ? 'opacity-100 shadow-lg' : 'opacity-0'
             }`}
-            onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
           />
           
-          {/* Edge Line + Arrow for resize indication */}
+          {/* Resize Handle Dot */}
           <div
-            className={`absolute -right-4 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+            className={`absolute right-0.5 top-1/2 transform -translate-y-1/2 w-2 h-6 bg-primary border border-background rounded-sm shadow-md transition-all duration-200 ${
+              hoveredEdge === 'end' ? 'opacity-100 scale-110' : 'opacity-0'
+            }`}
+          />
+          
+          {/* Visual Guide Lines */}
+          <div
+            className={`absolute -right-2 top-0 w-0.5 h-full bg-primary/40 transition-all duration-200 ${
               hoveredEdge === 'end' ? 'opacity-100' : 'opacity-0'
             }`}
-          >
-            <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-primary"></div>
-              <svg width="12" height="8" className="text-primary">
-                <path d="M4 4l4-2v4l-4-2z" fill="currentColor" />
-              </svg>
-            </div>
-          </div>
+          />
         </div>
 
         {/* Dependency Dot - Right (Completely outside strip) */}
@@ -312,7 +312,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
         {/* Center Move Area */}
         <div
-          className="absolute left-4 right-4 top-0 h-full cursor-move z-10"
+          className="absolute left-8 right-8 top-0 h-full cursor-move z-10"
           onMouseDown={(e) => handleMouseDown(e, 'move')}
         />
         
