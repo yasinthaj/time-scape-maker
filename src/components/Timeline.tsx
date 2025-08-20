@@ -5,6 +5,7 @@ import { Plus, Filter, Download } from 'lucide-react';
 import { TaskPanel } from './TaskPanel';
 import { TimelineGrid } from './TimelineGrid';
 import { TaskDrawer } from './TaskDrawer';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 export interface Task {
   id: string;
@@ -160,23 +161,31 @@ export const Timeline: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex h-[calc(100vh-64px)]">
-        {/* Task Panel */}
-        <TaskPanel
-          tasks={tasks}
-          onTaskClick={handleTaskClick}
-          onTaskUpdate={handleTaskUpdate}
-          onTaskDelete={handleTaskDelete}
-        />
-
-        {/* Timeline Grid */}
-        <div className="flex-1 overflow-hidden">
-          <TimelineGrid
-            tasks={tasks}
-            zoomLevel={zoomLevel}
-            onTaskUpdate={handleTaskUpdate}
-          />
-        </div>
+      <div className="h-[calc(100vh-64px)]">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* Task Panel */}
+          <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+            <TaskPanel
+              tasks={tasks}
+              onTaskClick={handleTaskClick}
+              onTaskUpdate={handleTaskUpdate}
+              onTaskDelete={handleTaskDelete}
+            />
+          </ResizablePanel>
+          
+          <ResizableHandle withHandle />
+          
+          {/* Timeline Grid */}
+          <ResizablePanel defaultSize={70} minSize={50}>
+            <div className="h-full overflow-hidden">
+              <TimelineGrid
+                tasks={tasks}
+                zoomLevel={zoomLevel}
+                onTaskUpdate={handleTaskUpdate}
+              />
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
 
       {/* Task Drawer */}
