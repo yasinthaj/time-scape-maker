@@ -159,7 +159,6 @@ export const Timeline: React.FC = () => {
       }
     });
 
-    console.log('Timeline filteredTasks order:', filtered.map((task, index) => `${index}: ${task.name}`));
     return filtered;
   }, [tasks, searchQuery, statusFilter, sortBy]);
 

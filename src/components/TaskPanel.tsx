@@ -82,82 +82,17 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
             </div>
           ) : (
             <div>
-              {tasks.map((task, index) => {
-                console.log(`Rendering TaskPanel row for: ${task.name} at index ${index}`);
-                return (
+              {tasks.map((task, index) => (
                 <div 
                   key={task.id} 
                   className={`flex border-b hover:bg-muted/50 transition-colors ${
-                    index % 2 === 0 ? 'bg-transparent' : 'bg-muted/20'
+                    selectedTasks.has(task.id) ? 'bg-muted/30' : ''
                   }`}
-                  style={{ height: TASK_ROW_HEIGHT }}
+                  style={{ height: '48px' }}
                 >
-                  {/* Checkbox */}
-                  <div className="w-8 p-2 border-r flex items-center justify-center">
-                    <Checkbox 
-                      checked={selectedTasks.has(task.id)}
-                      onCheckedChange={(checked) => handleTaskSelection(task.id, !!checked)}
-                    />
-                  </div>
-
-                  {/* Task Name */}
-                  <div 
-                    className="flex-1 px-4 py-2 border-r cursor-pointer flex items-center"
-                    onClick={() => onTaskClick(task)}
-                  >
-                    <div className="font-medium text-sm text-foreground hover:text-primary transition-colors truncate">
-                      {task.name}
-                    </div>
-                  </div>
-
-                  {/* Assignee */}
-                  <div className="w-24 px-2 py-2 flex items-center justify-between">
-                    {task.assignee ? (
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                            {getInitials(task.assignee)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs font-medium text-foreground">
-                          {getInitials(task.assignee)}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs bg-muted text-muted-foreground">
-                            ?
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs text-muted-foreground">--</span>
-                      </div>
-                    )}
-
-                    {/* Actions Menu */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreHorizontal className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" side="bottom">
-                        <DropdownMenuItem onClick={() => onTaskClick(task)}>
-                          Edit Task
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => onTaskDelete(task.id)}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete Task
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+...
                 </div>
-                );
-              })}
+              ))}
             </div>
           )}
         </div>
