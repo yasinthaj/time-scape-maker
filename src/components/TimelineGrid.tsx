@@ -127,11 +127,11 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
   return (
     <div
-      className={`absolute h-6 rounded-sm shadow-sm transition-all duration-200 hover:shadow-md hover:z-10 group cursor-pointer ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : ''}`}
+      className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 hover:shadow-md hover:z-10 group cursor-pointer ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : ''}`}
       style={{
         left: Math.max(0, taskStartPos),
         width: Math.max(minWidth, taskWidth),
-        top: rowIndex * 48 + 12, // Center in the 48px row
+        top: rowIndex * 48 + 8, // Align with task panel rows (48px row height, 8px margin from top)
       }}
       onMouseDown={(e) => handleMouseDown(e, 'move')}
       title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
@@ -151,7 +151,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
       )}
       
       {/* Task content */}
-      <div className="px-2 py-1 h-full flex items-center text-white text-xs font-medium relative z-10">
+      <div className="px-2 py-1 h-full flex items-center text-white text-sm font-medium relative z-10">
         <span className="truncate">{task.name}</span>
         {task.progress !== undefined && task.progress > 0 && (
           <span className="ml-1 text-xs opacity-80">({task.progress}%)</span>
