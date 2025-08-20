@@ -424,9 +424,11 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
     console.log('🔥 HANDLE DEPENDENCY CREATE called:', fromTaskId, '->', toTaskId);
     
-    // Check if dependency already exists
+    // Check if dependency already exists (check both old and new ID formats)
     const existingDep = dependencies.find(dep => 
-      dep.fromTaskId === fromTaskId && dep.toTaskId === toTaskId
+      (dep.fromTaskId === fromTaskId && dep.toTaskId === toTaskId) ||
+      dep.id === `${fromTaskId}-${toTaskId}` ||
+      dep.id.includes(`${fromTaskId}-to-${toTaskId}`)
     );
     
     if (existingDep) {
@@ -541,9 +543,20 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               ))}
             </div>
             
-            {/* Debug: Dependencies count */}
-            <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs z-50">
-              Dependencies: {dependencies.length} | Available Tasks: {tasks.length}
+            {/* Debug: Dependencies count and controls */}
+            <div className="absolute top-2 right-2 z-50 space-y-1">
+              <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-xs">
+                Dependencies: {dependencies.length} | Available Tasks: {tasks.length}
+              </div>
+              <button 
+                onClick={() => {
+                  console.log('🗑️ CLEARING ALL DEPENDENCIES');
+                  setDependencies([]);
+                }}
+                className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+              >
+                Clear All Dependencies
+              </button>
             </div>
 
             {/* Task bars */}
@@ -598,14 +611,18 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               <text x="15" y="25" fill="green" fontSize="12">SVG Working</text>
               
               {dependencies.map((dependency, index) => {
-                console.log(`Rendering dependency ${index}:`, dependency);
+                console.log(`🎨 Rendering dependency ${index + 1}/${dependencies.length}:`, dependency);
                 
                 const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
                 const toTask = tasks.find(t => t.id === dependency.toTaskId);
                 
                 if (!fromTask || !toTask) {
-                  console.log('Missing task for dependency:', dependency, { fromTask, toTask });
-                  return null;
+                  console.log('❌ Missing task for dependency:', dependency, { fromTask: !!fromTask, toTask: !!toTask });
+                  return (
+                    <text key={dependency.id} x="200" y={30 + index * 15} fill="red" fontSize="12">
+                      Error: Missing task for {dependency.id}
+                    </text>
+                  );
                 }
                 
                 const fromIndex = tasks.findIndex(t => t.id === dependency.fromTaskId);
@@ -624,8 +641,10 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 // Create curved path
                 const pathData = `M ${startX} ${fromY} Q ${midX} ${fromY} ${midX} ${(fromY + toY) / 2} Q ${midX} ${toY} ${endX} ${toY}`;
 
-                console.log('Rendering arrow:', {
-                  dependency,
+                console.log('🎨 Arrow coordinates:', {
+                  dependency: dependency.id,
+                  fromTask: fromTask.name,
+                  toTask: toTask.name,
                   fromY,
                   toY,
                   startX,
