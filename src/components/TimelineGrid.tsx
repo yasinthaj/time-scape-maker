@@ -642,18 +642,25 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 const headerHeight = 80;
                 const rowHeight = 48;
                 
-                // Calculate exact task positions
-                const fromTaskEndPos = differenceInDays(fromTask.endDate, startDate) * pixelsPerDay + pixelsPerDay;
+                // Calculate exact task bar positions
+                const fromTaskStartPos = differenceInDays(fromTask.startDate, startDate) * pixelsPerDay;
+                const fromTaskEndPos = fromTaskStartPos + Math.max(pixelsPerDay, differenceInDays(fromTask.endDate, fromTask.startDate) * pixelsPerDay + pixelsPerDay);
                 const toTaskStartPos = differenceInDays(toTask.startDate, startDate) * pixelsPerDay;
-                const toTaskEndPos = differenceInDays(toTask.endDate, startDate) * pixelsPerDay + pixelsPerDay;
+                const toTaskEndPos = toTaskStartPos + Math.max(pixelsPerDay, differenceInDays(toTask.endDate, toTask.startDate) * pixelsPerDay + pixelsPerDay);
                 
-                // Y positions (center of tasks)
-                const fromY = headerHeight + fromIndex * rowHeight + rowHeight / 2;
-                const toY = headerHeight + toIndex * rowHeight + rowHeight / 2;
+                // Y positions (connect to middle of task bars to avoid crossing through them)
+                const taskBarHeight = 32; // Height of task bar
+                const taskBarOffset = 8; // Top offset of task bar in row
+                const fromTaskCenterY = headerHeight + fromIndex * rowHeight + taskBarOffset + (taskBarHeight / 2);
+                const toTaskCenterY = headerHeight + toIndex * rowHeight + taskBarOffset + (taskBarHeight / 2);
                 
-                // Start from right edge of source task
+                // Connect from right edge of source task to left edge of target task
                 const startX = fromTaskEndPos;
                 const targetX = toTaskStartPos;
+                
+                // Use center Y positions for arrows
+                const fromY = fromTaskCenterY;
+                const toY = toTaskCenterY;
                 
                 let pathData;
                 
