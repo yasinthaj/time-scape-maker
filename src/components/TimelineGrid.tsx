@@ -494,6 +494,23 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               className="absolute pointer-events-none z-30" 
               style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}
             >
+              {/* Arrow marker definition - only once */}
+              <defs>
+                <marker
+                  id="arrowhead"
+                  markerWidth="10"
+                  markerHeight="7"
+                  refX="9"
+                  refY="3.5"
+                  orient="auto"
+                >
+                  <polygon
+                    points="0 0, 10 3.5, 0 7"
+                    fill="hsl(var(--muted-foreground))"
+                  />
+                </marker>
+              </defs>
+              
               {dependencies.map((dependency) => {
                 const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
                 const toTask = tasks.find(t => t.id === dependency.toTaskId);
@@ -517,32 +534,14 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 const pathData = `M ${startX} ${fromY} Q ${midX} ${fromY} ${midX} ${(fromY + toY) / 2} Q ${midX} ${toY} ${endX} ${toY}`;
 
                 return (
-                  <g key={dependency.id}>
-                    {/* Arrow line */}
-                    <path
-                      d={pathData}
-                      stroke="hsl(var(--muted-foreground))"
-                      strokeWidth="2"
-                      fill="none"
-                      markerEnd="url(#arrowhead)"
-                    />
-                    {/* Arrow marker definition */}
-                    <defs>
-                      <marker
-                        id="arrowhead"
-                        markerWidth="10"
-                        markerHeight="7"
-                        refX="9"
-                        refY="3.5"
-                        orient="auto"
-                      >
-                        <polygon
-                          points="0 0, 10 3.5, 0 7"
-                          fill="hsl(var(--muted-foreground))"
-                        />
-                      </marker>
-                    </defs>
-                  </g>
+                  <path
+                    key={dependency.id}
+                    d={pathData}
+                    stroke="hsl(var(--muted-foreground))"
+                    strokeWidth="2"
+                    fill="none"
+                    markerEnd="url(#arrowhead)"
+                  />
                 );
               })}
             </svg>
