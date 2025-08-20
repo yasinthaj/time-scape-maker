@@ -235,27 +235,27 @@ const TaskBar: React.FC<TaskBarProps> = ({
             onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
           />
           
-          {/* Edge Line + Arrow */}
+          {/* Edge Line + Arrow for resize indication */}
           <div
-            className={`absolute -left-3 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+            className={`absolute -left-4 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
               hoveredEdge === 'start' ? 'opacity-100' : 'opacity-0'
             }`}
           >
             <div className="flex items-center">
-              <svg width="12" height="8" className="text-white/80">
+              <svg width="12" height="8" className="text-primary">
                 <path d="M8 4L4 2v4l4-2z" fill="currentColor" />
               </svg>
-              <div className="w-2 h-0.5 bg-white/60"></div>
+              <div className="w-3 h-0.5 bg-primary"></div>
             </div>
           </div>
         </div>
 
-        {/* Dependency Dot - Left (Outside strip) */}
+        {/* Dependency Dot - Left (Slightly outside strip) */}
         <div
-          className={`absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
+          className={`absolute left-16 top-1/2 transform -translate-y-1/2 -translate-x-6 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
-          } hover:scale-110 hover:bg-muted-foreground/80`}
-          title="Create dependency"
+          } hover:scale-125 hover:bg-primary/80`}
+          title="Create dependency from this task"
           onMouseDown={handleDependencyMouseDown}
         />
 
@@ -273,27 +273,27 @@ const TaskBar: React.FC<TaskBarProps> = ({
             onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
           />
           
-          {/* Edge Line + Arrow */}
+          {/* Edge Line + Arrow for resize indication */}
           <div
-            className={`absolute -right-3 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+            className={`absolute -right-4 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
               hoveredEdge === 'end' ? 'opacity-100' : 'opacity-0'
             }`}
           >
             <div className="flex items-center">
-              <div className="w-2 h-0.5 bg-white/60"></div>
-              <svg width="12" height="8" className="text-white/80">
+              <div className="w-3 h-0.5 bg-primary"></div>
+              <svg width="12" height="8" className="text-primary">
                 <path d="M4 4l4-2v4l-4-2z" fill="currentColor" />
               </svg>
             </div>
           </div>
         </div>
 
-        {/* Dependency Dot - Right (Outside strip) */}
+        {/* Dependency Dot - Right (Slightly outside strip) */}
         <div
-          className={`absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
+          className={`absolute right-16 top-1/2 transform -translate-y-1/2 translate-x-6 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
-          } hover:scale-110 hover:bg-muted-foreground/80`}
-          title="Create dependency"
+          } hover:scale-125 hover:bg-primary/80`}
+          title="Create dependency from this task"
           onMouseDown={handleDependencyMouseDown}
         />
 
