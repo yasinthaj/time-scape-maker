@@ -645,9 +645,9 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 
                 let pathData;
                 
-                // ClickUp-style dependency arrows
-                const minGapForDirect = 20; // Minimum gap for direct connection
-                const extensionDistance = 30; // How far to extend around overlapping tasks
+                // ClickUp-style dependency arrows with better logic
+                const minGapForDirect = 15; // Minimum gap for direct connection
+                const smallExtension = 15; // Small extension for overlapping tasks
                 
                 // Check if there's enough space for a direct connection
                 const hasDirectSpace = targetX > startX && (targetX - startX) >= minGapForDirect;
@@ -658,17 +658,15 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                     // Same row - straight line
                     pathData = `M ${startX} ${fromY} L ${targetX} ${toY}`;
                   } else {
-                    // Different rows - right angle with corner rounding effect
+                    // Different rows - right angle
                     const cornerX = startX + (targetX - startX) / 2;
                     pathData = `M ${startX} ${fromY} L ${cornerX} ${fromY} L ${cornerX} ${toY} L ${targetX} ${toY}`;
                   }
                 } else {
-                  // Tasks overlap or are too close - extend around (ClickUp style)
-                  // Find the rightmost edge to extend beyond
-                  const rightmostX = Math.max(fromTaskEndPos, toTaskEndPos);
-                  const extendToX = rightmostX + extensionDistance;
+                  // Tasks overlap or are too close - use minimal extension
+                  const extendToX = startX + smallExtension;
                   
-                  // Create ClickUp-style path: right → down/up → left
+                  // Create path: right → down/up → left
                   pathData = `M ${startX} ${fromY} L ${extendToX} ${fromY} L ${extendToX} ${toY} L ${targetX} ${toY}`;
                 }
 
