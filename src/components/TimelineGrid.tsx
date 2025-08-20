@@ -411,8 +411,19 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
 
   const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
     console.log('Creating dependency:', fromTaskId, '->', toTaskId);
+    
+    // Check if dependency already exists
+    const existingDep = dependencies.find(dep => 
+      dep.fromTaskId === fromTaskId && dep.toTaskId === toTaskId
+    );
+    
+    if (existingDep) {
+      console.log('Dependency already exists:', existingDep);
+      return;
+    }
+    
     const newDependency: Dependency = {
-      id: `${fromTaskId}-${toTaskId}`,
+      id: `dep-${fromTaskId}-to-${toTaskId}-${Date.now()}`, // Unique ID with timestamp
       fromTaskId,
       toTaskId,
     };
@@ -553,7 +564,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               {/* Arrow marker definition - only once */}
               <defs>
                 <marker
-                  id="arrowhead"
+                  id="dependency-arrowhead"
                   markerWidth="10"
                   markerHeight="7"
                   refX="9"
@@ -562,21 +573,23 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 >
                   <polygon
                     points="0 0, 10 3.5, 0 7"
-                    fill="red"
+                    fill="hsl(var(--primary))"
                   />
                 </marker>
               </defs>
               
               {/* Debug rect to test SVG visibility */}
-              <rect x="0" y="0" width="100" height="20" fill="rgba(255,0,0,0.3)" />
-              <text x="5" y="15" fill="red" fontSize="12">SVG Test</text>
+              <rect x="10" y="10" width="100" height="20" fill="rgba(0,255,0,0.3)" stroke="green" />
+              <text x="15" y="25" fill="green" fontSize="12">SVG Working</text>
               
-              {dependencies.map((dependency) => {
+              {dependencies.map((dependency, index) => {
+                console.log(`Rendering dependency ${index}:`, dependency);
+                
                 const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
                 const toTask = tasks.find(t => t.id === dependency.toTaskId);
                 
                 if (!fromTask || !toTask) {
-                  console.log('Missing task for dependency:', dependency);
+                  console.log('Missing task for dependency:', dependency, { fromTask, toTask });
                   return null;
                 }
                 
@@ -608,17 +621,24 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 return (
                   <g key={dependency.id}>
                     {/* Debug circle at start */}
-                    <circle cx={startX} cy={fromY} r="3" fill="blue" />
+                    <circle cx={startX} cy={fromY} r="4" fill="blue" stroke="white" strokeWidth="1" />
                     {/* Debug circle at end */}
-                    <circle cx={endX} cy={toY} r="3" fill="green" />
+                    <circle cx={endX} cy={toY} r="4" fill="green" stroke="white" strokeWidth="1" />
                     {/* Actual arrow path */}
                     <path
                       d={pathData}
-                      stroke="red"
+                      stroke="hsl(var(--primary))"
                       strokeWidth="3"
                       fill="none"
-                      markerEnd="url(#arrowhead)"
+                      markerEnd="url(#dependency-arrowhead)"
                     />
+                    {/* Debug text */}
+                    <text x={startX} y={fromY - 10} fill="blue" fontSize="10">
+                      {dependency.fromTaskId}
+                    </text>
+                    <text x={endX} y={toY - 10} fill="green" fontSize="10">
+                      {dependency.toTaskId}
+                    </text>
                   </g>
                 );
               })}
