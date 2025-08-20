@@ -34,8 +34,8 @@ const sampleTasks: Task[] = [
     status: 'completed',
     priority: 'high',
     assignee: 'John Doe',
-    startDate: new Date(2024, 7, 1),
-    endDate: new Date(2024, 7, 7),
+    startDate: new Date(2024, 11, 16), // Dec 16, 2024
+    endDate: new Date(2024, 11, 22), // Dec 22, 2024
     progress: 100,
     description: 'Initial project setup and requirement gathering'
   },
@@ -45,8 +45,8 @@ const sampleTasks: Task[] = [
     status: 'in-progress',
     priority: 'high',
     assignee: 'Sarah Wilson',
-    startDate: new Date(2024, 7, 8),
-    endDate: new Date(2024, 7, 20),
+    startDate: new Date(2024, 11, 23), // Dec 23, 2024
+    endDate: new Date(2025, 0, 10), // Jan 10, 2025
     progress: 65,
     dependencies: ['1'],
     description: 'Create wireframes and design mockups'
@@ -57,8 +57,8 @@ const sampleTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     assignee: 'Mike Johnson',
-    startDate: new Date(2024, 7, 15),
-    endDate: new Date(2024, 8, 5),
+    startDate: new Date(2025, 0, 6), // Jan 6, 2025
+    endDate: new Date(2025, 1, 15), // Feb 15, 2025
     progress: 0,
     dependencies: ['1'],
     description: 'API development and database setup'
@@ -69,8 +69,8 @@ const sampleTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     assignee: 'Emily Chen',
-    startDate: new Date(2024, 7, 22),
-    endDate: new Date(2024, 8, 10),
+    startDate: new Date(2025, 0, 11), // Jan 11, 2025
+    endDate: new Date(2025, 1, 28), // Feb 28, 2025
     progress: 0,
     dependencies: ['2'],
     description: 'React component development'
@@ -81,11 +81,46 @@ const sampleTasks: Task[] = [
     status: 'todo',
     priority: 'high',
     assignee: 'David Brown',
-    startDate: new Date(2024, 8, 6),
-    endDate: new Date(2024, 8, 15),
+    startDate: new Date(2025, 1, 16), // Feb 16, 2025
+    endDate: new Date(2025, 2, 5), // Mar 5, 2025
     progress: 0,
     dependencies: ['3', '4'],
     description: 'Comprehensive testing and quality assurance'
+  },
+  {
+    id: '6',
+    name: 'Database Design',
+    status: 'completed',
+    priority: 'high',
+    assignee: 'Alex Rodriguez',
+    startDate: new Date(2024, 11, 20), // Dec 20, 2024
+    endDate: new Date(2024, 11, 30), // Dec 30, 2024
+    progress: 100,
+    description: 'Design database schema and relationships'
+  },
+  {
+    id: '7',
+    name: 'User Authentication System',
+    status: 'in-progress',
+    priority: 'high',
+    assignee: 'Lisa Wang',
+    startDate: new Date(2025, 0, 2), // Jan 2, 2025
+    endDate: new Date(2025, 0, 20), // Jan 20, 2025
+    progress: 40,
+    dependencies: ['6'],
+    description: 'Implement login, registration, and security features'
+  },
+  {
+    id: '8',
+    name: 'Content Management',
+    status: 'todo',
+    priority: 'medium',
+    assignee: 'Tom Harris',
+    startDate: new Date(2025, 1, 1), // Feb 1, 2025
+    endDate: new Date(2025, 2, 15), // Mar 15, 2025
+    progress: 0,
+    dependencies: ['4'],
+    description: 'Build content creation and management tools'
   }
 ];
 
