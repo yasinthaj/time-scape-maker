@@ -26,35 +26,18 @@ const TaskBar: React.FC<TaskBarProps> = ({
   onTaskUpdate,
   rowIndex 
 }) => {
+  // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY EARLY RETURNS
   const [isDragging, setIsDragging] = useState(false);
   const [dragType, setDragType] = useState<'move' | 'resize-start' | 'resize-end' | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, taskStart: task.startDate, taskEnd: task.endDate });
 
+  // Calculate positions
   const taskStartPos = differenceInDays(task.startDate, startDate) * pixelsPerDay;
   const taskEndPos = differenceInDays(task.endDate, startDate) * pixelsPerDay;
   const taskWidth = Math.max(pixelsPerDay, taskEndPos - taskStartPos + pixelsPerDay);
   const minWidth = pixelsPerDay; // Minimum 1 day
 
-  // Only render if task overlaps with the visible date range
-  if (task.endDate < startDate || task.startDate > endDate) {
-    return null;
-  }
-
-  const getStatusColor = (status: Task['status']) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-task-completed';
-      case 'in-progress':
-        return 'bg-task-progress';
-      case 'todo':
-        return 'bg-task-default';
-      case 'overdue':
-        return 'bg-task-overdue';
-      default:
-        return 'bg-task-default';
-    }
-  };
-
+  // Mouse event handlers
   const handleMouseDown = (e: React.MouseEvent, type: 'move' | 'resize-start' | 'resize-end') => {
     e.preventDefault();
     setIsDragging(true);
@@ -121,6 +104,26 @@ const TaskBar: React.FC<TaskBarProps> = ({
       document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [isDragging, dragType, dragStart, pixelsPerDay, task, onTaskUpdate]);
+
+  const getStatusColor = (status: Task['status']) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-task-completed';
+      case 'in-progress':
+        return 'bg-task-progress';
+      case 'todo':
+        return 'bg-task-default';
+      case 'overdue':
+        return 'bg-task-overdue';
+      default:
+        return 'bg-task-default';
+    }
+  };
+
+  // NOW we can safely do early returns AFTER all hooks are called
+  if (task.endDate < startDate || task.startDate > endDate) {
+    return null;
+  }
 
   return (
     <div
