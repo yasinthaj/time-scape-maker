@@ -726,7 +726,35 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                     
                     {/* Delete button - appears on hover */}
                     {isHovered && (
-                      <g>
+                      <g
+                        onMouseEnter={() => console.log('🖱️ DELETE BUTTON MOUSE ENTER')}
+                        onMouseMove={() => console.log('🖱️ DELETE BUTTON MOUSE MOVE')}
+                        onClick={(e) => {
+                          console.log('🗑️ DELETE GROUP CLICKED for dependency:', dependency.id);
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDependencyDelete(dependency.id);
+                        }}
+                      >
+                        {/* Large invisible clickable area first */}
+                        <circle
+                          cx={midX}
+                          cy={midY}
+                          r="15"
+                          fill="transparent"
+                          stroke="none"
+                          style={{ 
+                            pointerEvents: 'all',
+                            cursor: 'pointer'
+                          }}
+                          onClick={(e) => {
+                            console.log('🗑️ INVISIBLE CIRCLE CLICKED for dependency:', dependency.id);
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDependencyDelete(dependency.id);
+                          }}
+                        />
+                        
                         {/* Delete button background */}
                         <circle
                           cx={midX}
@@ -735,52 +763,38 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                           fill="hsl(var(--background))"
                           stroke="hsl(var(--destructive))"
                           strokeWidth="2"
-                          className="animate-scale-in cursor-pointer"
+                          className="animate-scale-in"
                           style={{ 
-                            pointerEvents: 'auto',
+                            pointerEvents: 'all',
                             cursor: 'pointer'
-                          }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            console.log('🗑️ DELETE BUTTON CLICKED for dependency:', dependency.id);
-                            handleDependencyDelete(dependency.id);
                           }}
                         />
                         
-                        {/* X icon - larger clickable area */}
-                        <g
-                          className="cursor-pointer"
+                        {/* X icon */}
+                        <line
+                          x1={midX - 5}
+                          y1={midY - 5}
+                          x2={midX + 5}
+                          y2={midY + 5}
+                          stroke="hsl(var(--destructive))"
+                          strokeWidth="2"
+                          strokeLinecap="round"
                           style={{ 
-                            pointerEvents: 'auto',
-                            cursor: 'pointer'
+                            pointerEvents: 'none'
                           }}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            console.log('🗑️ X ICON CLICKED for dependency:', dependency.id);
-                            handleDependencyDelete(dependency.id);
+                        />
+                        <line
+                          x1={midX + 5}
+                          y1={midY - 5}
+                          x2={midX - 5}
+                          y2={midY + 5}
+                          stroke="hsl(var(--destructive))"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          style={{ 
+                            pointerEvents: 'none'
                           }}
-                        >
-                          <line
-                            x1={midX - 5}
-                            y1={midY - 5}
-                            x2={midX + 5}
-                            y2={midY + 5}
-                            stroke="hsl(var(--destructive))"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                          <line
-                            x1={midX + 5}
-                            y1={midY - 5}
-                            x2={midX - 5}
-                            y2={midY + 5}
-                            stroke="hsl(var(--destructive))"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                        </g>
+                        />
                       </g>
                     )}
                   </g>
