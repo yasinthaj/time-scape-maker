@@ -286,72 +286,64 @@ const TaskBar: React.FC<TaskBarProps> = ({
         </div>
       </div>
 
-      {/* DEBUG: Hover Indicators with Highly Visible Colors */}
+      {/* Hover Indicators */}
       {isHovered && (
         <>
-          {/* Left Vertical Line - BRIGHT RED for testing */}
+          {/* Left Resize Line */}
           <div
-            className="absolute bg-red-500 shadow-lg pointer-events-none"
+            className="absolute bg-primary/80 shadow-md pointer-events-auto cursor-ew-resize transition-all duration-200"
             style={{
-              width: '4px',
-              height: '40px',
-              left: Math.max(0, taskStartPos) - 2,
-              top: rowIndex * 48 + 4,
+              width: '3px',
+              height: '36px',
+              left: Math.max(0, taskStartPos) - 1.5,
+              top: rowIndex * 48 + 6,
               zIndex: 60,
             }}
+            onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
+            title="Resize task start"
           />
           
-          {/* Right Vertical Line - BRIGHT BLUE for testing */}
+          {/* Right Resize Line */}
           <div
-            className="absolute bg-blue-500 shadow-lg pointer-events-none"
+            className="absolute bg-primary/80 shadow-md pointer-events-auto cursor-ew-resize transition-all duration-200"
             style={{
-              width: '4px', 
-              height: '40px',
-              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) - 2,
-              top: rowIndex * 48 + 4,
+              width: '3px', 
+              height: '36px',
+              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) - 1.5,
+              top: rowIndex * 48 + 6,
               zIndex: 60,
             }}
+            onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
+            title="Resize task end"
           />
           
-          {/* Left Dependency Dot - BRIGHT GREEN for testing */}
+          {/* Left Dependency Dot */}
           <div
-            className="absolute bg-green-500 border-4 border-black rounded-full cursor-crosshair shadow-xl pointer-events-auto hover:scale-125"
+            className="absolute bg-primary border-2 border-background rounded-full cursor-crosshair shadow-lg pointer-events-auto hover:scale-125 transition-all duration-200"
             style={{
-              width: '16px',
-              height: '16px',
-              left: Math.max(0, taskStartPos) - 24,
-              top: rowIndex * 48 + 16,
+              width: '12px',
+              height: '12px',
+              left: Math.max(0, taskStartPos) - 20,
+              top: rowIndex * 48 + 18,
               zIndex: 70,
             }}
             title="Create dependency from this task"
             onMouseDown={handleDependencyMouseDown}
           />
           
-          {/* Right Dependency Dot - BRIGHT PURPLE for testing */}
+          {/* Right Dependency Dot */}
           <div
-            className="absolute bg-purple-500 border-4 border-black rounded-full cursor-crosshair shadow-xl pointer-events-auto hover:scale-125"
+            className="absolute bg-primary border-2 border-background rounded-full cursor-crosshair shadow-lg pointer-events-auto hover:scale-125 transition-all duration-200"
             style={{
-              width: '16px',
-              height: '16px', 
+              width: '12px',
+              height: '12px', 
               left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) + 8,
-              top: rowIndex * 48 + 16,
+              top: rowIndex * 48 + 18,
               zIndex: 70,
             }}
             title="Create dependency from this task"
             onMouseDown={handleDependencyMouseDown}
           />
-          
-          {/* Debug Text Indicator */}
-          <div
-            className="absolute bg-yellow-300 text-black text-sm px-2 py-1 pointer-events-none border-2 border-black"
-            style={{
-              left: Math.max(0, taskStartPos),
-              top: rowIndex * 48 - 25,
-              zIndex: 80,
-            }}
-          >
-            HOVER ACTIVE: {task.name}
-          </div>
         </>
       )}
 
