@@ -270,20 +270,20 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   return (
     <Card className="flex-1 h-full rounded-none border-y-0 border-r-0 overflow-hidden">
       <div className="h-full flex flex-col">
-        {/* Date Header - Sticky */}
-        <div className="relative z-20">
-          <DateHeader dates={dates} zoomLevel={zoomLevel} />
-        </div>
-        
-        {/* Timeline Grid - Scrollable */}
+        {/* Timeline Grid - Scrollable with Header */}
         <div 
           ref={scrollRef} 
           className="flex-1 overflow-x-auto overflow-y-auto relative"
           style={{ scrollbarWidth: 'thin' }}
         >
           <div className="relative" style={{ width: totalWidth, minHeight: '100%' }}>
+            {/* Date Header - Scrolls with content */}
+            <div className="sticky top-0 z-20">
+              <DateHeader dates={dates} zoomLevel={zoomLevel} />
+            </div>
+
             {/* Grid lines */}
-            <div className="absolute inset-y-0 flex">
+            <div className="absolute top-20 bottom-0 flex" style={{ height: 'calc(100% - 80px)' }}>
               {dates.map((date, index) => (
                 <div
                   key={index}
@@ -297,12 +297,12 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             
             {/* Today line */}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-timeline-today z-10 shadow-sm"
-              style={{ left: todayPosition }}
+              className="absolute bottom-0 w-0.5 bg-timeline-today z-10 shadow-sm"
+              style={{ left: todayPosition, top: '80px', height: 'calc(100% - 80px)' }}
             />
             
             {/* Task rows background */}
-            <div className="absolute inset-0">
+            <div className="absolute" style={{ top: '80px', left: 0, right: 0, bottom: 0 }}>
               {tasks.map((_, index) => (
                 <div
                   key={index}
@@ -318,7 +318,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             </div>
             
             {/* Task bars */}
-            <div className="relative" style={{ height: Math.max(tasks.length * 48, 400), minHeight: '100%' }}>
+            <div className="relative" style={{ height: Math.max(tasks.length * 48, 400), minHeight: '100%', top: '80px' }}>
               {tasks.map((task, index) => (
                 <TaskBar
                   key={task.id}
