@@ -229,6 +229,8 @@ const TaskBar: React.FC<TaskBarProps> = ({
           onHover(null);
           setHoveredEdge(null);
         }}
+        onMouseMove={() => console.log('🖱️ MOUSE MOVE:', task.name)}
+        onClick={() => console.log('🖱️ CLICK:', task.name)}
         title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
       >
         {/* Left Edge Area */}
