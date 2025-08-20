@@ -634,16 +634,40 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 const fromY = headerHeight + fromIndex * 48 + 24; // Center of task + header
                 const toY = headerHeight + toIndex * 48 + 24; // Center of task + header
                 
-                const startX = fromTaskEndPos + 2; // Small offset from end of task
-                const endX = Math.max(toTaskStartPos - 2, startX + 20); // Small offset to start of task
+                // Handle overlapping or consecutive tasks
+                const tasksOverlap = fromTaskEndPos >= toTaskStartPos;
+                let startX, endX, pathData;
                 
-                // Create clean curved path like ClickUp
-                const controlX1 = startX + Math.abs(endX - startX) * 0.3;
-                const controlY1 = fromY;
-                const controlX2 = endX - Math.abs(endX - startX) * 0.3;
-                const controlY2 = toY;
-                
-                const pathData = `M ${startX} ${fromY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${endX} ${toY}`;
+                if (tasksOverlap) {
+                  // Tasks overlap or are consecutive - use arc path above/below
+                  const midX = (fromTaskEndPos + toTaskStartPos) / 2;
+                  const isBelow = toIndex > fromIndex;
+                  const arcHeight = Math.abs(toY - fromY) / 2 + 30; // Arc height
+                  
+                  // Start from task center, end at task center
+                  startX = fromTaskEndPos - pixelsPerDay / 2;
+                  endX = toTaskStartPos + pixelsPerDay / 2;
+                  
+                  const controlY = isBelow ? Math.max(fromY, toY) + arcHeight : Math.min(fromY, toY) - arcHeight;
+                  
+                  // Create arc path that goes around the overlapping area
+                  pathData = `M ${startX} ${fromY} Q ${midX} ${controlY} ${endX} ${toY}`;
+                } else {
+                  // Normal case - tasks don't overlap
+                  startX = fromTaskEndPos + 2;
+                  endX = toTaskStartPos - 2;
+                  
+                  // Straight or gentle curve for non-overlapping tasks
+                  if (Math.abs(fromY - toY) < 20) {
+                    // Same row or close rows - straight line
+                    pathData = `M ${startX} ${fromY} L ${endX} ${toY}`;
+                  } else {
+                    // Different rows - curved path
+                    const controlX1 = startX + Math.abs(endX - startX) * 0.3;
+                    const controlX2 = endX - Math.abs(endX - startX) * 0.3;
+                    pathData = `M ${startX} ${fromY} C ${controlX1} ${fromY}, ${controlX2} ${toY}, ${endX} ${toY}`;
+                  }
+                }
 
                 return (
                   <path
