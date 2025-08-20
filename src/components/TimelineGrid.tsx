@@ -122,12 +122,18 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
     const handleMouseUp = (e: MouseEvent) => {
       if (dragType === 'dependency') {
+        console.log('Dependency drag ended at:', e.clientX, e.clientY);
         // Check if dropped on another task
         const element = document.elementFromPoint(e.clientX, e.clientY);
+        console.log('Element at drop point:', element);
         const taskElement = element?.closest('[data-task-id]');
+        console.log('Task element found:', taskElement, 'with ID:', taskElement?.getAttribute('data-task-id'));
         if (taskElement && taskElement.getAttribute('data-task-id') !== task.id) {
           const toTaskId = taskElement.getAttribute('data-task-id')!;
+          console.log('Creating dependency from', task.id, 'to', toTaskId);
           onDependencyCreate(task.id, toTaskId);
+        } else {
+          console.log('No valid drop target found');
         }
       }
       
@@ -373,12 +379,17 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
 
   const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
+    console.log('Creating dependency:', fromTaskId, '->', toTaskId);
     const newDependency: Dependency = {
       id: `${fromTaskId}-${toTaskId}`,
       fromTaskId,
       toTaskId,
     };
-    setDependencies(prev => [...prev, newDependency]);
+    setDependencies(prev => {
+      const updated = [...prev, newDependency];
+      console.log('Dependencies updated:', updated);
+      return updated;
+    });
   };
   
   // Calculate date range and pixel scale
@@ -473,6 +484,11 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               ))}
             </div>
             
+            {/* Debug: Dependencies count */}
+            <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs z-50">
+              Dependencies: {dependencies.length}
+            </div>
+
             {/* Task bars */}
             <div className="absolute" style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}>
               {tasks.map((task, index) => (
@@ -488,8 +504,17 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                  />
               ))}
             </div>
-
-            {/* Dependency Arrows */}
+            
+            {/* Debug: Dependencies list */}
+            {dependencies.length > 0 && (
+              <div className="absolute top-10 right-2 bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs z-50 max-w-xs">
+                {dependencies.map(dep => (
+                  <div key={dep.id}>{dep.fromTaskId} → {dep.toTaskId}</div>
+                ))}
+              </div>
+            )}
+            
+            {/* Dependency arrows */}
             <svg 
               className="absolute pointer-events-none z-30" 
               style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}
@@ -506,20 +531,27 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 >
                   <polygon
                     points="0 0, 10 3.5, 0 7"
-                    fill="hsl(var(--muted-foreground))"
+                    fill="red"
                   />
                 </marker>
               </defs>
               
+              {/* Debug rect to test SVG visibility */}
+              <rect x="0" y="0" width="100" height="20" fill="rgba(255,0,0,0.3)" />
+              <text x="5" y="15" fill="red" fontSize="12">SVG Test</text>
+              
               {dependencies.map((dependency) => {
                 const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
                 const toTask = tasks.find(t => t.id === dependency.toTaskId);
+                
+                if (!fromTask || !toTask) {
+                  console.log('Missing task for dependency:', dependency);
+                  return null;
+                }
+                
                 const fromIndex = tasks.findIndex(t => t.id === dependency.fromTaskId);
                 const toIndex = tasks.findIndex(t => t.id === dependency.toTaskId);
                 
-                if (!fromTask || !toTask) return null;
-
-                // Calculate positions
                 const fromTaskEndPos = differenceInDays(fromTask.endDate, startDate) * pixelsPerDay + pixelsPerDay;
                 const toTaskStartPos = differenceInDays(toTask.startDate, startDate) * pixelsPerDay;
                 
@@ -528,20 +560,35 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 
                 const startX = fromTaskEndPos;
                 const endX = toTaskStartPos;
-                
-                // Arrow path with curve
                 const midX = startX + (endX - startX) / 2;
+                
+                // Create curved path
                 const pathData = `M ${startX} ${fromY} Q ${midX} ${fromY} ${midX} ${(fromY + toY) / 2} Q ${midX} ${toY} ${endX} ${toY}`;
 
+                console.log('Rendering arrow:', {
+                  dependency,
+                  fromY,
+                  toY,
+                  startX,
+                  endX,
+                  pathData
+                });
+
                 return (
-                  <path
-                    key={dependency.id}
-                    d={pathData}
-                    stroke="hsl(var(--muted-foreground))"
-                    strokeWidth="2"
-                    fill="none"
-                    markerEnd="url(#arrowhead)"
-                  />
+                  <g key={dependency.id}>
+                    {/* Debug circle at start */}
+                    <circle cx={startX} cy={fromY} r="3" fill="blue" />
+                    {/* Debug circle at end */}
+                    <circle cx={endX} cy={toY} r="3" fill="green" />
+                    {/* Actual arrow path */}
+                    <path
+                      d={pathData}
+                      stroke="red"
+                      strokeWidth="3"
+                      fill="none"
+                      markerEnd="url(#arrowhead)"
+                    />
+                  </g>
                 );
               })}
             </svg>
