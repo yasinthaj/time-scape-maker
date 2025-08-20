@@ -726,17 +726,8 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                     
                     {/* Delete button - appears on hover */}
                     {isHovered && (
-                      <g
-                        onMouseEnter={() => console.log('🖱️ DELETE BUTTON MOUSE ENTER')}
-                        onMouseMove={() => console.log('🖱️ DELETE BUTTON MOUSE MOVE')}
-                        onClick={(e) => {
-                          console.log('🗑️ DELETE GROUP CLICKED for dependency:', dependency.id);
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDependencyDelete(dependency.id);
-                        }}
-                      >
-                        {/* Large invisible clickable area first */}
+                      <>
+                        {/* Large clickable area */}
                         <circle
                           cx={midX}
                           cy={midY}
@@ -747,55 +738,52 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                             pointerEvents: 'all',
                             cursor: 'pointer'
                           }}
-                          onClick={(e) => {
-                            console.log('🗑️ INVISIBLE CIRCLE CLICKED for dependency:', dependency.id);
+                          onMouseDown={(e) => {
+                            console.log('🗑️ MOUSE DOWN on delete button');
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          onMouseUp={(e) => {
+                            console.log('🗑️ MOUSE UP on delete button - DELETING:', dependency.id);
                             e.preventDefault();
                             e.stopPropagation();
                             handleDependencyDelete(dependency.id);
                           }}
                         />
                         
-                        {/* Delete button background */}
+                        {/* Visible delete button background */}
                         <circle
                           cx={midX}
                           cy={midY}
-                          r="12"
+                          r="10"
                           fill="hsl(var(--background))"
                           stroke="hsl(var(--destructive))"
                           strokeWidth="2"
-                          className="animate-scale-in"
-                          style={{ 
-                            pointerEvents: 'all',
-                            cursor: 'pointer'
-                          }}
+                          style={{ pointerEvents: 'none' }}
                         />
                         
                         {/* X icon */}
-                        <line
-                          x1={midX - 5}
-                          y1={midY - 5}
-                          x2={midX + 5}
-                          y2={midY + 5}
-                          stroke="hsl(var(--destructive))"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          style={{ 
-                            pointerEvents: 'none'
-                          }}
-                        />
-                        <line
-                          x1={midX + 5}
-                          y1={midY - 5}
-                          x2={midX - 5}
-                          y2={midY + 5}
-                          stroke="hsl(var(--destructive))"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          style={{ 
-                            pointerEvents: 'none'
-                          }}
-                        />
-                      </g>
+                        <g style={{ pointerEvents: 'none' }}>
+                          <line
+                            x1={midX - 4}
+                            y1={midY - 4}
+                            x2={midX + 4}
+                            y2={midY + 4}
+                            stroke="hsl(var(--destructive))"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                          <line
+                            x1={midX + 4}
+                            y1={midY - 4}
+                            x2={midX - 4}
+                            y2={midY + 4}
+                            stroke="hsl(var(--destructive))"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </g>
+                      </>
                     )}
                   </g>
                 );
