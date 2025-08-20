@@ -52,7 +52,7 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
     <Card className="w-96 h-full rounded-none border-r border-y-0 border-l-0 bg-card">
       <CardContent className="p-0 h-full flex flex-col">
         {/* Header */}
-        <div className="flex border-b bg-muted/30 sticky top-0 z-10">
+        <div className="flex border-b bg-muted/30 sticky top-0 z-10" style={{ height: '80px' }}>
           <div className="w-8 p-2 border-r flex items-center justify-center">
             <Checkbox 
               checked={selectedTasks.size === tasks.length && tasks.length > 0}
@@ -65,10 +65,10 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
               }}
             />
           </div>
-          <div className="flex-1 px-4 py-3 border-r">
+          <div className="flex-1 px-4 py-3 border-r flex items-center">
             <h3 className="font-semibold text-sm text-foreground">Name</h3>
           </div>
-          <div className="w-24 px-4 py-3">
+          <div className="w-24 px-4 py-3 flex items-center">
             <h3 className="font-semibold text-sm text-foreground">Assignee</h3>
           </div>
         </div>

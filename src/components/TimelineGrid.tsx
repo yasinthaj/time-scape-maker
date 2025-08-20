@@ -167,13 +167,13 @@ const DateHeader: React.FC<{ dates: Date[]; zoomLevel: ZoomLevel }> = ({ dates, 
   const columnWidth = zoomLevel === 'day' ? '120px' : zoomLevel === 'week' ? '60px' : '40px';
 
   return (
-    <div className="border-b bg-card sticky top-0 z-20">
+    <div className="border-b bg-card sticky top-0 z-20" style={{ height: '80px' }}>
       {/* Month Row */}
-      <div className="flex border-b bg-muted/30">
+      <div className="flex border-b bg-muted/30" style={{ height: '40px' }}>
         {Object.values(monthGroups).map((group, groupIndex) => (
           <div
             key={groupIndex}
-            className="flex-shrink-0 px-2 py-2 text-sm font-semibold text-center border-r text-foreground bg-gradient-to-r from-primary/5 to-primary/10"
+            className="flex-shrink-0 px-2 py-2 text-sm font-semibold text-center border-r text-foreground bg-gradient-to-r from-primary/5 to-primary/10 flex items-center justify-center"
             style={{ width: `calc(${columnWidth} * ${group.dates.length})` }}
           >
             {group.month}
@@ -182,11 +182,11 @@ const DateHeader: React.FC<{ dates: Date[]; zoomLevel: ZoomLevel }> = ({ dates, 
       </div>
       
       {/* Days Row */}
-      <div className="flex">
+      <div className="flex" style={{ height: '40px' }}>
         {dates.map((date, index) => (
           <div
             key={index}
-            className={`flex-shrink-0 px-1 py-2 text-sm font-medium border-r text-center transition-colors ${
+            className={`flex-shrink-0 px-1 py-2 text-sm font-medium border-r text-center transition-colors flex items-center justify-center ${
               isToday(date) 
                 ? 'bg-timeline-today/10 text-timeline-today font-bold' 
                 : 'text-muted-foreground hover:bg-muted/50'
