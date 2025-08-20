@@ -233,7 +233,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
           {/* Vertical Resize Line */}
           <div
             className={`absolute left-0 top-0 w-0.5 h-full bg-white/80 transition-all duration-200 ${
-              hoveredEdge === 'start' || isHovered ? 'opacity-100' : 'opacity-0'
+              isHovered ? 'opacity-100' : 'opacity-0'
             }`}
           />
           
@@ -269,7 +269,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
           {/* Vertical Resize Line */}
           <div
             className={`absolute right-0 top-0 w-0.5 h-full bg-white/80 transition-all duration-200 ${
-              hoveredEdge === 'end' || isHovered ? 'opacity-100' : 'opacity-0'
+              isHovered ? 'opacity-100' : 'opacity-0'
             }`}
           />
           
