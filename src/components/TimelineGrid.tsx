@@ -123,17 +123,26 @@ const TaskBar: React.FC<TaskBarProps> = ({
     const handleMouseUp = (e: MouseEvent) => {
       if (dragType === 'dependency') {
         console.log('Dependency drag ended at:', e.clientX, e.clientY);
-        // Check if dropped on another task
-        const element = document.elementFromPoint(e.clientX, e.clientY);
-        console.log('Element at drop point:', element);
-        const taskElement = element?.closest('[data-task-id]');
+        // Check if dropped on another task - use a wider search area
+        const elements = document.elementsFromPoint(e.clientX, e.clientY);
+        console.log('Elements at drop point:', elements);
+        
+        let taskElement = null;
+        for (const element of elements) {
+          const candidate = element.closest('[data-task-id]');
+          if (candidate) {
+            taskElement = candidate;
+            break;
+          }
+        }
+        
         console.log('Task element found:', taskElement, 'with ID:', taskElement?.getAttribute('data-task-id'));
         if (taskElement && taskElement.getAttribute('data-task-id') !== task.id) {
           const toTaskId = taskElement.getAttribute('data-task-id')!;
           console.log('Creating dependency from', task.id, 'to', toTaskId);
           onDependencyCreate(task.id, toTaskId);
         } else {
-          console.log('No valid drop target found');
+          console.log('No valid drop target found - current task:', task.id);
         }
       }
       
@@ -151,7 +160,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, dragType, dragStart, pixelsPerDay, task, onTaskUpdate]);
+  }, [isDragging, dragType, dragStart, pixelsPerDay, task, onTaskUpdate, onDependencyCreate]);
 
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
