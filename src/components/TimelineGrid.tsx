@@ -645,34 +645,31 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 
                 let pathData;
                 
-                // ClickUp logic: Check if we need to go around
-                const isOverlapping = startX >= targetX;
-                const gap = targetX - startX;
+                // ClickUp-style dependency arrows
+                const minGapForDirect = 20; // Minimum gap for direct connection
+                const extensionDistance = 30; // How far to extend around overlapping tasks
                 
-                if (!isOverlapping && gap >= 30) {
-                  // Normal case - enough space between tasks
+                // Check if there's enough space for a direct connection
+                const hasDirectSpace = targetX > startX && (targetX - startX) >= minGapForDirect;
+                
+                if (hasDirectSpace) {
+                  // Direct connection possible
                   if (Math.abs(fromY - toY) <= 5) {
-                    // Same row - direct line
+                    // Same row - straight line
                     pathData = `M ${startX} ${fromY} L ${targetX} ${toY}`;
                   } else {
-                    // Different rows - simple right angle
-                    const midX = startX + gap / 2;
-                    pathData = `M ${startX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${targetX} ${toY}`;
+                    // Different rows - right angle with corner rounding effect
+                    const cornerX = startX + (targetX - startX) / 2;
+                    pathData = `M ${startX} ${fromY} L ${cornerX} ${fromY} L ${cornerX} ${toY} L ${targetX} ${toY}`;
                   }
                 } else {
-                  // Overlapping or tight spacing - extend around like ClickUp
-                  // Calculate how far to extend beyond both tasks
-                  const extensionDistance = Math.max(30, Math.abs(toTaskEndPos - startX) + 20);
-                  const extensionX = Math.max(startX, toTaskEndPos) + extensionDistance;
+                  // Tasks overlap or are too close - extend around (ClickUp style)
+                  // Find the rightmost edge to extend beyond
+                  const rightmostX = Math.max(fromTaskEndPos, toTaskEndPos);
+                  const extendToX = rightmostX + extensionDistance;
                   
-                  if (Math.abs(fromY - toY) <= 5) {
-                    // Same row - extend right, then come back
-                    pathData = `M ${startX} ${fromY} L ${extensionX} ${fromY} L ${extensionX} ${toY} L ${targetX} ${toY}`;
-                  } else {
-                    // Different rows - ClickUp style path
-                    // Go right from source, down/up to target level, then left to target
-                    pathData = `M ${startX} ${fromY} L ${extensionX} ${fromY} L ${extensionX} ${toY} L ${targetX} ${toY}`;
-                  }
+                  // Create ClickUp-style path: right → down/up → left
+                  pathData = `M ${startX} ${fromY} L ${extendToX} ${fromY} L ${extendToX} ${toY} L ${targetX} ${toY}`;
                 }
 
                 return (
