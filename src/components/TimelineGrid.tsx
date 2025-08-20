@@ -150,32 +150,60 @@ const TaskBar: React.FC<TaskBarProps> = ({
 };
 
 const DateHeader: React.FC<{ dates: Date[]; zoomLevel: ZoomLevel }> = ({ dates, zoomLevel }) => {
-  const formatHeaderDate = (date: Date) => {
-    switch (zoomLevel) {
-      case 'day':
-        return format(date, 'EEE d');
-      case 'week':
-        return format(date, 'MMM d');
-      case 'month':
-        return format(date, 'MMM yyyy');
-      default:
-        return format(date, 'MMM d');
+  // Group dates by month for the header
+  const monthGroups = dates.reduce((groups, date, index) => {
+    const monthKey = format(date, 'yyyy-MM');
+    if (!groups[monthKey]) {
+      groups[monthKey] = {
+        month: format(date, 'MMMM yyyy'),
+        dates: [],
+        startIndex: index,
+      };
     }
-  };
+    groups[monthKey].dates.push({ date, index });
+    return groups;
+  }, {} as Record<string, { month: string; dates: { date: Date; index: number }[]; startIndex: number }>);
+
+  const columnWidth = zoomLevel === 'day' ? '120px' : zoomLevel === 'week' ? '60px' : '40px';
 
   return (
-    <div className="flex border-b bg-card sticky top-0 z-20">
-      {dates.map((date, index) => (
-        <div
-          key={index}
-          className={`flex-shrink-0 p-2 text-sm font-medium border-r text-center ${
-            isToday(date) ? 'bg-timeline-today/10 text-timeline-today' : 'text-muted-foreground'
-          }`}
-          style={{ width: zoomLevel === 'day' ? '120px' : zoomLevel === 'week' ? '60px' : '40px' }}
-        >
-          {formatHeaderDate(date)}
-        </div>
-      ))}
+    <div className="border-b bg-card sticky top-0 z-20">
+      {/* Month Row */}
+      <div className="flex border-b bg-muted/30">
+        {Object.values(monthGroups).map((group, groupIndex) => (
+          <div
+            key={groupIndex}
+            className="flex-shrink-0 px-2 py-2 text-sm font-semibold text-center border-r text-foreground bg-gradient-to-r from-primary/5 to-primary/10"
+            style={{ width: `calc(${columnWidth} * ${group.dates.length})` }}
+          >
+            {group.month}
+          </div>
+        ))}
+      </div>
+      
+      {/* Days Row */}
+      <div className="flex">
+        {dates.map((date, index) => (
+          <div
+            key={index}
+            className={`flex-shrink-0 px-1 py-2 text-sm font-medium border-r text-center transition-colors ${
+              isToday(date) 
+                ? 'bg-timeline-today/10 text-timeline-today font-bold' 
+                : 'text-muted-foreground hover:bg-muted/50'
+            }`}
+            style={{ width: columnWidth }}
+          >
+            <div className="space-y-0">
+              <div className="text-xs opacity-75">
+                {format(date, 'EEE')}
+              </div>
+              <div className={`text-sm ${isToday(date) ? 'font-bold' : 'font-medium'}`}>
+                {format(date, 'd')}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
