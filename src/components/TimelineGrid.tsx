@@ -195,32 +195,22 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
   return (
     <>
-      {/* Expanded task container to include dependency dots */}
+      {/* Main task bar with normal positioning */}
       <div
         data-task-id={task.id}
-        className="absolute"
+        className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
         style={{
-          left: Math.max(0, taskStartPos) - 20, // Extended left for dependency dots
-          width: Math.max(minWidth, taskWidth) + 40, // Extended both sides
-          height: 48,
-          top: rowIndex * 48,
+          left: Math.max(0, taskStartPos),
+          width: Math.max(minWidth, taskWidth),
+          top: rowIndex * 48 + 8,
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setHoveredEdge(null);
+        }}
+        title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
       >
-        {/* Main task bar */}
-        <div
-          className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
-          style={{
-            left: 20, // Offset by the extended area
-            width: Math.max(minWidth, taskWidth),
-            top: 8,
-          }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => {
-            setIsHovered(false);
-            setHoveredEdge(null);
-          }}
-          title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
-        >
         {/* Left Edge Area */}
         <div
           className="absolute left-0 top-0 h-full w-4 flex items-center justify-start z-30"
@@ -252,9 +242,14 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
         {/* Dependency Dot - Left (Completely outside strip) */}
         <div
-          className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
+          className={`absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
           } hover:scale-125 hover:bg-primary/80`}
+          style={{
+            left: -12, // 12px outside the left edge of task bar
+            top: '50%',
+            transform: 'translateY(-50%)'
+          }}
           title="Create dependency from this task"
           onMouseDown={handleDependencyMouseDown}
         />
@@ -290,37 +285,40 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
         {/* Dependency Dot - Right (Completely outside strip) */}
         <div
-          className={`absolute right-4 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
+          className={`absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
           } hover:scale-125 hover:bg-primary/80`}
+          style={{
+            right: -12, // 12px outside the right edge of task bar
+            top: '50%',
+            transform: 'translateY(-50%)'
+          }}
           title="Create dependency from this task"
           onMouseDown={handleDependencyMouseDown}
         />
 
-          {/* Center Move Area */}
-          <div
-            className="absolute left-4 right-4 top-0 h-full cursor-move z-10"
-            onMouseDown={(e) => handleMouseDown(e, 'move')}
+        {/* Center Move Area */}
+        <div
+          className="absolute left-4 right-4 top-0 h-full cursor-move z-10"
+          onMouseDown={(e) => handleMouseDown(e, 'move')}
+        />
+        
+        {/* Progress indicator background */}
+        {task.progress !== undefined && task.progress > 0 && (
+          <div 
+            className="absolute top-0 left-0 h-full bg-white/25 transition-all duration-300 rounded-l-sm"
+            style={{ width: `${task.progress}%` }}
           />
-          
-          {/* Progress indicator background */}
+        )}
+        
+        {/* Task content */}
+        <div className="px-4 py-1 h-full flex items-center text-white text-sm font-medium relative z-10">
+          <span className="truncate">{task.name}</span>
           {task.progress !== undefined && task.progress > 0 && (
-            <div 
-              className="absolute top-0 left-0 h-full bg-white/25 transition-all duration-300 rounded-l-sm"
-              style={{ width: `${task.progress}%` }}
-            />
+            <span className="ml-1 text-xs opacity-80">({task.progress}%)</span>
           )}
-          
-          {/* Task content */}
-          <div className="px-4 py-1 h-full flex items-center text-white text-sm font-medium relative z-10">
-            <span className="truncate">{task.name}</span>
-            {task.progress !== undefined && task.progress > 0 && (
-              <span className="ml-1 text-xs opacity-80">({task.progress}%)</span>
-            )}
-          </div>
         </div>
-
-      </div> {/* Close expanded task container */}
+      </div>
 
       {/* Dependency Preview Line */}
       {dependencyPreview && dragType === 'dependency' && (
