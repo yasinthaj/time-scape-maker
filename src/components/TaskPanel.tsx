@@ -82,7 +82,9 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
             </div>
           ) : (
             <div>
-              {tasks.map((task, index) => (
+              {tasks.map((task, index) => {
+                console.log(`Rendering TaskPanel row for: ${task.name} at index ${index}`);
+                return (
                 <div 
                   key={task.id} 
                   className={`flex border-b hover:bg-muted/50 transition-colors ${
@@ -154,7 +156,8 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                     </DropdownMenu>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

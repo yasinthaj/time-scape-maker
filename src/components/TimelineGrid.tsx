@@ -122,8 +122,11 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
   // NOW we can safely do early returns AFTER all hooks are called
   if (task.endDate < startDate || task.startDate > endDate) {
+    console.log(`TaskBar for ${task.name} is outside visible range - not rendering`);
     return null;
   }
+
+  console.log(`Rendering TaskBar for: ${task.name} at row ${rowIndex}, top: ${rowIndex * 48 + 8}px`);
 
   return (
     <div
@@ -324,7 +327,9 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             
             {/* Task bars */}
             <div className="relative" style={{ height: Math.max(tasks.length * 48, 400), minHeight: '100%', top: '80px' }}>
-              {tasks.map((task, index) => (
+              {tasks.map((task, index) => {
+                console.log(`Rendering TimelineGrid TaskBar for: ${task.name} at index ${index}`);
+                return (
                 <TaskBar
                   key={task.id}
                   task={task}
@@ -334,7 +339,8 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                   onTaskUpdate={onTaskUpdate}
                   rowIndex={index}
                 />
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
