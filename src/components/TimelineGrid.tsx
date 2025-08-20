@@ -600,15 +600,15 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               <defs>
                 <marker
                   id="dependency-arrowhead"
-                  markerWidth="10"
-                  markerHeight="10"
-                  refX="8"
-                  refY="5"
+                  markerWidth="6"
+                  markerHeight="6"
+                  refX="5"
+                  refY="3"
                   orient="auto"
                   markerUnits="strokeWidth"
                 >
                   <path
-                    d="M0,0 L0,10 L8,5 z"
+                    d="M0,0 L0,6 L5,3 z"
                     fill="hsl(var(--muted-foreground))"
                     stroke="none"
                   />
