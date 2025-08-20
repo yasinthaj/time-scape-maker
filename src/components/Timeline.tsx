@@ -163,9 +163,21 @@ export const Timeline: React.FC = () => {
   }, [tasks, searchQuery, statusFilter, sortBy]);
 
   const handleTaskUpdate = (updatedTask: Task) => {
-    setTasks(prev => prev.map(task => 
-      task.id === updatedTask.id ? updatedTask : task
-    ));
+    console.log('Timeline received task update:', {
+      id: updatedTask.id,
+      name: updatedTask.name,
+      startDate: updatedTask.startDate,
+      endDate: updatedTask.endDate
+    });
+    
+    setTasks(prev => {
+      const updated = prev.map(task => 
+        task.id === updatedTask.id ? updatedTask : task
+      );
+      console.log('Updated tasks array:', updated);
+      return updated;
+    });
+    
     toast({
       title: "Task Updated",
       description: `${updatedTask.name} has been updated successfully.`,

@@ -102,10 +102,18 @@ export const TaskDrawer: React.FC<TaskDrawerProps> = ({
       parentId: formData.parentId,
     };
 
+    console.log('Saving task with dates:', {
+      name: taskData.name,
+      startDate: taskData.startDate,
+      endDate: taskData.endDate
+    });
+
     if (task) {
       onTaskUpdate({ ...task, ...taskData });
+      console.log('Updated task:', { ...task, ...taskData });
     } else {
       onTaskCreate(taskData);
+      console.log('Created new task:', taskData);
     }
 
     onClose();
@@ -244,29 +252,32 @@ export const TaskDrawer: React.FC<TaskDrawerProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Start Date *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.startDate && "text-muted-foreground",
-                      errors.startDate && "border-destructive"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.startDate ? format(formData.startDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.startDate}
-                    onSelect={(date) => setFormData({ ...formData, startDate: date })}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.startDate && "text-muted-foreground",
+                          errors.startDate && "border-destructive"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.startDate ? format(formData.startDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.startDate}
+                        onSelect={(date) => {
+                          console.log('Start date selected:', date);
+                          setFormData({ ...formData, startDate: date || new Date() })
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
               {errors.startDate && (
                 <p className="text-sm text-destructive">{errors.startDate}</p>
               )}
@@ -274,29 +285,32 @@ export const TaskDrawer: React.FC<TaskDrawerProps> = ({
 
             <div className="space-y-2">
               <Label className="text-sm font-medium">End Date *</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !formData.endDate && "text-muted-foreground",
-                      errors.endDate && "border-destructive"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.endDate ? format(formData.endDate, "PPP") : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.endDate}
-                    onSelect={(date) => setFormData({ ...formData, endDate: date })}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.endDate && "text-muted-foreground",
+                          errors.endDate && "border-destructive"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.endDate ? format(formData.endDate, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.endDate}
+                        onSelect={(date) => {
+                          console.log('End date selected:', date);
+                          setFormData({ ...formData, endDate: date || new Date() })
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
               {errors.endDate && (
                 <p className="text-sm text-destructive">{errors.endDate}</p>
               )}

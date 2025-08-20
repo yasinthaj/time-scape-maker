@@ -35,8 +35,19 @@ const TaskBar: React.FC<TaskBarProps> = ({
   const taskWidth = Math.max(pixelsPerDay, taskEndPos - taskStartPos + pixelsPerDay);
   const minWidth = pixelsPerDay; // Minimum 1 day
 
+  // Debug logging
+  console.log(`Task ${task.name}:`, {
+    startDate: task.startDate,
+    endDate: task.endDate,
+    taskStartPos,
+    taskEndPos,
+    taskWidth,
+    visible: !(task.endDate < startDate || task.startDate > endDate)
+  });
+
   // Only render if task overlaps with the visible date range
   if (task.endDate < startDate || task.startDate > endDate) {
+    console.log(`Task ${task.name} is outside visible range, not rendering`);
     return null;
   }
 
