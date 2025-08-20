@@ -207,6 +207,8 @@ const DateHeader: React.FC<{ dates: Date[]; zoomLevel: ZoomLevel }> = ({ dates, 
             className={`flex-shrink-0 px-1 py-2 text-sm font-medium border-r text-center transition-colors flex items-center justify-center ${
               isToday(date) 
                 ? 'bg-timeline-today/10 text-timeline-today font-bold' 
+                : date.getDay() === 0 || date.getDay() === 6
+                ? 'bg-muted/30 text-muted-foreground' // Weekend styling
                 : 'text-muted-foreground hover:bg-muted/50'
             }`}
             style={{ width: columnWidth }}
@@ -293,7 +295,11 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 <div
                   key={index}
                   className={`border-r h-full ${
-                    isToday(date) ? 'border-timeline-today/30' : 'border-timeline-grid'
+                    isToday(date) 
+                      ? 'border-timeline-today/30' 
+                      : date.getDay() === 0 || date.getDay() === 6
+                      ? 'bg-muted/20 border-timeline-grid' // Weekend background
+                      : 'border-timeline-grid'
                   }`}
                   style={{ width: pixelsPerDay }}
                 />
