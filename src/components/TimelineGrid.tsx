@@ -250,9 +250,9 @@ const TaskBar: React.FC<TaskBarProps> = ({
           </div>
         </div>
 
-        {/* Dependency Dot - Left (Slightly outside strip) */}
+        {/* Dependency Dot - Left (Completely outside strip) */}
         <div
-          className={`absolute left-16 top-1/2 transform -translate-y-1/2 -translate-x-6 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
+          className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
           } hover:scale-125 hover:bg-primary/80`}
           title="Create dependency from this task"
@@ -288,9 +288,9 @@ const TaskBar: React.FC<TaskBarProps> = ({
           </div>
         </div>
 
-        {/* Dependency Dot - Right (Slightly outside strip) */}
+        {/* Dependency Dot - Right (Completely outside strip) */}
         <div
-          className={`absolute right-16 top-1/2 transform -translate-y-1/2 translate-x-6 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
+          className={`absolute right-4 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
           } hover:scale-125 hover:bg-primary/80`}
           title="Create dependency from this task"
