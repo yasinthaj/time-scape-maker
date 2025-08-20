@@ -123,24 +123,35 @@ const TaskBar: React.FC<TaskBarProps> = ({
     const handleMouseUp = (e: MouseEvent) => {
       if (dragType === 'dependency') {
         console.log('Dependency drag ended at:', e.clientX, e.clientY);
-        // Check if dropped on another task - use a wider search area
-        const elements = document.elementsFromPoint(e.clientX, e.clientY);
-        console.log('Elements at drop point:', elements);
         
-        let taskElement = null;
+        // Get all elements at the drop point
+        const elements = document.elementsFromPoint(e.clientX, e.clientY);
+        console.log('All elements at drop point:', elements.map(el => el.tagName + (el.className ? '.' + el.className.split(' ').join('.') : '')));
+        
+        // Look for any element with data-task-id
+        let targetTaskId = null;
         for (const element of elements) {
-          const candidate = element.closest('[data-task-id]');
-          if (candidate) {
-            taskElement = candidate;
+          const taskId = element.getAttribute('data-task-id');
+          if (taskId && taskId !== task.id) {
+            targetTaskId = taskId;
+            console.log('Found target task:', taskId);
             break;
+          }
+          // Also check parent elements
+          const parent = element.closest('[data-task-id]');
+          if (parent) {
+            const parentTaskId = parent.getAttribute('data-task-id');
+            if (parentTaskId && parentTaskId !== task.id) {
+              targetTaskId = parentTaskId;
+              console.log('Found target task in parent:', parentTaskId);
+              break;
+            }
           }
         }
         
-        console.log('Task element found:', taskElement, 'with ID:', taskElement?.getAttribute('data-task-id'));
-        if (taskElement && taskElement.getAttribute('data-task-id') !== task.id) {
-          const toTaskId = taskElement.getAttribute('data-task-id')!;
-          console.log('Creating dependency from', task.id, 'to', toTaskId);
-          onDependencyCreate(task.id, toTaskId);
+        if (targetTaskId) {
+          console.log('Creating dependency from', task.id, 'to', targetTaskId);
+          onDependencyCreate(task.id, targetTaskId);
         } else {
           console.log('No valid drop target found - current task:', task.id);
         }
@@ -241,7 +252,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
         {/* Dependency Dot - Left (Outside strip) */}
         <div
-          className={`absolute left-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
+          className={`absolute -left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
           } hover:scale-110 hover:bg-muted-foreground/80`}
           title="Create dependency"
@@ -279,7 +290,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
         {/* Dependency Dot - Right (Outside strip) */}
         <div
-          className={`absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
+          className={`absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
           } hover:scale-110 hover:bg-muted-foreground/80`}
           title="Create dependency"
