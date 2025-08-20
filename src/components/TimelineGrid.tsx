@@ -605,7 +605,8 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 top: 0, 
                 left: 0, 
                 width: '100%', 
-                height: '100%'
+                height: '100%',
+                pointerEvents: 'auto'
               }}
             >
               {/* Arrow marker definition */}
@@ -730,41 +731,53 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                         <circle
                           cx={midX}
                           cy={midY}
-                          r="10"
+                          r="12"
                           fill="hsl(var(--background))"
-                          stroke="hsl(var(--muted-foreground))"
-                          strokeWidth="1"
+                          stroke="hsl(var(--destructive))"
+                          strokeWidth="2"
                           className="animate-scale-in cursor-pointer"
+                          style={{ 
+                            pointerEvents: 'auto',
+                            cursor: 'pointer'
+                          }}
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
+                            console.log('🗑️ DELETE BUTTON CLICKED for dependency:', dependency.id);
                             handleDependencyDelete(dependency.id);
                           }}
                         />
                         
-                        {/* X icon */}
+                        {/* X icon - larger clickable area */}
                         <g
                           className="cursor-pointer"
+                          style={{ 
+                            pointerEvents: 'auto',
+                            cursor: 'pointer'
+                          }}
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
+                            console.log('🗑️ X ICON CLICKED for dependency:', dependency.id);
                             handleDependencyDelete(dependency.id);
                           }}
                         >
                           <line
-                            x1={midX - 4}
-                            y1={midY - 4}
-                            x2={midX + 4}
-                            y2={midY + 4}
-                            stroke="hsl(var(--muted-foreground))"
-                            strokeWidth="1.5"
+                            x1={midX - 5}
+                            y1={midY - 5}
+                            x2={midX + 5}
+                            y2={midY + 5}
+                            stroke="hsl(var(--destructive))"
+                            strokeWidth="2"
                             strokeLinecap="round"
                           />
                           <line
-                            x1={midX + 4}
-                            y1={midY - 4}
-                            x2={midX - 4}
-                            y2={midY + 4}
-                            stroke="hsl(var(--muted-foreground))"
-                            strokeWidth="1.5"
+                            x1={midX + 5}
+                            y1={midY - 5}
+                            x2={midX - 5}
+                            y2={midY + 5}
+                            stroke="hsl(var(--destructive))"
+                            strokeWidth="2"
                             strokeLinecap="round"
                           />
                         </g>
