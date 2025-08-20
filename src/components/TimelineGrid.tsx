@@ -3,6 +3,12 @@ import { Card } from '@/components/ui/card';
 import type { Task, ZoomLevel } from './Timeline';
 import { format, startOfDay, endOfDay, addDays, addWeeks, addMonths, differenceInDays, isToday } from 'date-fns';
 
+interface Dependency {
+  id: string;
+  fromTaskId: string;
+  toTaskId: string;
+}
+
 interface TimelineGridProps {
   tasks: Task[];
   zoomLevel: ZoomLevel;
@@ -15,6 +21,7 @@ interface TaskBarProps {
   endDate: Date;
   pixelsPerDay: number;
   onTaskUpdate: (task: Task) => void;
+  onDependencyCreate: (fromTaskId: string, toTaskId: string) => void;
   rowIndex: number;
 }
 
@@ -24,6 +31,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
   endDate, 
   pixelsPerDay, 
   onTaskUpdate,
+  onDependencyCreate,
   rowIndex 
 }) => {
   // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY EARLY RETURNS
@@ -118,8 +126,8 @@ const TaskBar: React.FC<TaskBarProps> = ({
         const element = document.elementFromPoint(e.clientX, e.clientY);
         const taskElement = element?.closest('[data-task-id]');
         if (taskElement && taskElement.getAttribute('data-task-id') !== task.id) {
-          console.log(`Create dependency from ${task.id} to ${taskElement.getAttribute('data-task-id')}`);
-          // Here you would call a callback to create the dependency
+          const toTaskId = taskElement.getAttribute('data-task-id')!;
+          onDependencyCreate(task.id, toTaskId);
         }
       }
       
@@ -362,6 +370,16 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [hasScrolledToToday, setHasScrolledToToday] = useState(false);
+  const [dependencies, setDependencies] = useState<Dependency[]>([]);
+
+  const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
+    const newDependency: Dependency = {
+      id: `${fromTaskId}-${toTaskId}`,
+      fromTaskId,
+      toTaskId,
+    };
+    setDependencies(prev => [...prev, newDependency]);
+  };
   
   // Calculate date range and pixel scale
   const today = startOfDay(new Date());
@@ -458,17 +476,76 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             {/* Task bars */}
             <div className="absolute" style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}>
               {tasks.map((task, index) => (
-                <TaskBar
-                  key={task.id}
-                  task={task}
-                  startDate={startDate}
-                  endDate={endDate}
-                  pixelsPerDay={pixelsPerDay}
-                  onTaskUpdate={onTaskUpdate}
-                  rowIndex={index}
-                />
+                 <TaskBar
+                   key={task.id}
+                   task={task}
+                   startDate={startDate}
+                   endDate={endDate}
+                   pixelsPerDay={pixelsPerDay}
+                   onTaskUpdate={onTaskUpdate}
+                   onDependencyCreate={handleDependencyCreate}
+                   rowIndex={index}
+                 />
               ))}
             </div>
+
+            {/* Dependency Arrows */}
+            <svg 
+              className="absolute pointer-events-none z-30" 
+              style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}
+            >
+              {dependencies.map((dependency) => {
+                const fromTask = tasks.find(t => t.id === dependency.fromTaskId);
+                const toTask = tasks.find(t => t.id === dependency.toTaskId);
+                const fromIndex = tasks.findIndex(t => t.id === dependency.fromTaskId);
+                const toIndex = tasks.findIndex(t => t.id === dependency.toTaskId);
+                
+                if (!fromTask || !toTask) return null;
+
+                // Calculate positions
+                const fromTaskEndPos = differenceInDays(fromTask.endDate, startDate) * pixelsPerDay + pixelsPerDay;
+                const toTaskStartPos = differenceInDays(toTask.startDate, startDate) * pixelsPerDay;
+                
+                const fromY = fromIndex * 48 + 24; // Center of task
+                const toY = toIndex * 48 + 24; // Center of task
+                
+                const startX = fromTaskEndPos;
+                const endX = toTaskStartPos;
+                
+                // Arrow path with curve
+                const midX = startX + (endX - startX) / 2;
+                const pathData = `M ${startX} ${fromY} Q ${midX} ${fromY} ${midX} ${(fromY + toY) / 2} Q ${midX} ${toY} ${endX} ${toY}`;
+
+                return (
+                  <g key={dependency.id}>
+                    {/* Arrow line */}
+                    <path
+                      d={pathData}
+                      stroke="hsl(var(--muted-foreground))"
+                      strokeWidth="2"
+                      fill="none"
+                      markerEnd="url(#arrowhead)"
+                    />
+                    {/* Arrow marker definition */}
+                    <defs>
+                      <marker
+                        id="arrowhead"
+                        markerWidth="10"
+                        markerHeight="7"
+                        refX="9"
+                        refY="3.5"
+                        orient="auto"
+                      >
+                        <polygon
+                          points="0 0, 10 3.5, 0 7"
+                          fill="hsl(var(--muted-foreground))"
+                        />
+                      </marker>
+                    </defs>
+                  </g>
+                );
+              })}
+            </svg>
           </div>
         </div>
       </div>
