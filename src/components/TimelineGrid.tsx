@@ -424,11 +424,9 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
     console.log('🔥 HANDLE DEPENDENCY CREATE called:', fromTaskId, '->', toTaskId);
     
-    // Check if dependency already exists (check both old and new ID formats)
+    // Simple check for existing dependency
     const existingDep = dependencies.find(dep => 
-      (dep.fromTaskId === fromTaskId && dep.toTaskId === toTaskId) ||
-      dep.id === `${fromTaskId}-${toTaskId}` ||
-      dep.id.includes(`${fromTaskId}-to-${toTaskId}`)
+      dep.fromTaskId === fromTaskId && dep.toTaskId === toTaskId
     );
     
     if (existingDep) {
@@ -437,16 +435,19 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
     }
     
     const newDependency: Dependency = {
-      id: `dep-${fromTaskId}-to-${toTaskId}-${Date.now()}`, // Unique ID with timestamp
+      id: `${fromTaskId}-to-${toTaskId}`,
       fromTaskId,
       toTaskId,
     };
     
     console.log('✨ Creating new dependency:', newDependency);
+    console.log('📊 Current dependencies before update:', dependencies);
     
-    setDependencies(prev => {
-      const updated = [...prev, newDependency];
-      console.log('📊 Dependencies state updated from', prev.length, 'to', updated.length, ':', updated);
+    // Force state update with proper callback
+    setDependencies(prevDeps => {
+      const updated = [...prevDeps, newDependency];
+      console.log('📊 Dependencies state updating from', prevDeps.length, 'to', updated.length);
+      console.log('📊 New dependencies array:', updated);
       return updated;
     });
   };
@@ -586,8 +587,13 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             
             {/* Dependency arrows */}
             <svg 
-              className="absolute pointer-events-none z-30" 
-              style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}
+              className="absolute pointer-events-none z-40" 
+              style={{ 
+                top: 0, 
+                left: 0, 
+                width: '100%', 
+                height: '100%'
+              }}
             >
               {/* Arrow marker definition - only once */}
               <defs>
@@ -607,8 +613,13 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               </defs>
               
               {/* Debug rect to test SVG visibility */}
-              <rect x="10" y="10" width="100" height="20" fill="rgba(0,255,0,0.3)" stroke="green" />
-              <text x="15" y="25" fill="green" fontSize="12">SVG Working</text>
+              <rect x="10" y="10" width="150" height="30" fill="rgba(0,255,0,0.3)" stroke="green" strokeWidth="2" />
+              <text x="15" y="30" fill="green" fontSize="14" fontWeight="bold">SVG OVERLAY WORKING</text>
+              
+              {/* Dependencies counter */}
+              <text x="10" y="60" fill="purple" fontSize="14" fontWeight="bold">
+                Dependencies: {dependencies.length}
+              </text>
               
               {dependencies.map((dependency, index) => {
                 console.log(`🎨 Rendering dependency ${index + 1}/${dependencies.length}:`, dependency);
@@ -619,8 +630,8 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 if (!fromTask || !toTask) {
                   console.log('❌ Missing task for dependency:', dependency, { fromTask: !!fromTask, toTask: !!toTask });
                   return (
-                    <text key={dependency.id} x="200" y={30 + index * 15} fill="red" fontSize="12">
-                      Error: Missing task for {dependency.id}
+                    <text key={dependency.id} x="200" y={80 + index * 20} fill="red" fontSize="12" fontWeight="bold">
+                      ERROR: {dependency.id} - Missing tasks
                     </text>
                   );
                 }
@@ -628,18 +639,19 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 const fromIndex = tasks.findIndex(t => t.id === dependency.fromTaskId);
                 const toIndex = tasks.findIndex(t => t.id === dependency.toTaskId);
                 
+                // Calculate positions with header offset
+                const headerHeight = 80;
                 const fromTaskEndPos = differenceInDays(fromTask.endDate, startDate) * pixelsPerDay + pixelsPerDay;
                 const toTaskStartPos = differenceInDays(toTask.startDate, startDate) * pixelsPerDay;
                 
-                const fromY = fromIndex * 48 + 24; // Center of task
-                const toY = toIndex * 48 + 24; // Center of task
+                const fromY = headerHeight + fromIndex * 48 + 24; // Center of task + header
+                const toY = headerHeight + toIndex * 48 + 24; // Center of task + header
                 
-                const startX = fromTaskEndPos;
-                const endX = toTaskStartPos;
-                const midX = startX + (endX - startX) / 2;
+                const startX = fromTaskEndPos + 5; // Small offset from end of task
+                const endX = Math.max(toTaskStartPos - 5, startX + 30); // Small offset to start of task
                 
-                // Create curved path
-                const pathData = `M ${startX} ${fromY} Q ${midX} ${fromY} ${midX} ${(fromY + toY) / 2} Q ${midX} ${toY} ${endX} ${toY}`;
+                // Simple straight line for now to test
+                const pathData = `M ${startX} ${fromY} L ${endX} ${toY}`;
 
                 console.log('🎨 Arrow coordinates:', {
                   dependency: dependency.id,
@@ -649,29 +661,31 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                   toY,
                   startX,
                   endX,
-                  pathData
+                  headerHeight
                 });
 
                 return (
                   <g key={dependency.id}>
-                    {/* Debug circle at start */}
-                    <circle cx={startX} cy={fromY} r="4" fill="blue" stroke="white" strokeWidth="1" />
-                    {/* Debug circle at end */}
-                    <circle cx={endX} cy={toY} r="4" fill="green" stroke="white" strokeWidth="1" />
-                    {/* Actual arrow path */}
+                    {/* Large debug circles to make them visible */}
+                    <circle cx={startX} cy={fromY} r="8" fill="blue" stroke="white" strokeWidth="2" opacity="0.8" />
+                    <circle cx={endX} cy={toY} r="8" fill="green" stroke="white" strokeWidth="2" opacity="0.8" />
+                    
+                    {/* Thick arrow line */}
                     <path
                       d={pathData}
                       stroke="hsl(var(--primary))"
-                      strokeWidth="3"
+                      strokeWidth="4"
                       fill="none"
                       markerEnd="url(#dependency-arrowhead)"
+                      opacity="0.9"
                     />
-                    {/* Debug text */}
-                    <text x={startX} y={fromY - 10} fill="blue" fontSize="10">
-                      {dependency.fromTaskId}
+                    
+                    {/* Clear debug text */}
+                    <text x={startX + 12} y={fromY - 5} fill="blue" fontSize="12" fontWeight="bold">
+                      FROM: {dependency.fromTaskId}
                     </text>
-                    <text x={endX} y={toY - 10} fill="green" fontSize="10">
-                      {dependency.toTaskId}
+                    <text x={endX + 12} y={toY + 15} fill="green" fontSize="12" fontWeight="bold">
+                      TO: {dependency.toTaskId}
                     </text>
                   </g>
                 );
