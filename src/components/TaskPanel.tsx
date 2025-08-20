@@ -90,7 +90,53 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                   }`}
                   style={{ height: '48px' }}
                 >
-...
+                  {/* Checkbox */}
+                  <div className="w-8 p-2 border-r flex items-center justify-center">
+                    <Checkbox 
+                      checked={selectedTasks.has(task.id)}
+                      onCheckedChange={(checked) => handleTaskSelection(task.id, !!checked)}
+                    />
+                  </div>
+                  
+                  {/* Task Name */}
+                  <div className="flex-1 px-4 py-2 border-r flex items-center">
+                    <button
+                      onClick={() => onTaskClick(task)}
+                      className="text-left hover:text-primary transition-colors text-sm font-medium text-foreground w-full"
+                    >
+                      {task.name}
+                    </button>
+                  </div>
+                  
+                  {/* Assignee */}
+                  <div className="w-24 px-2 py-2 flex items-center justify-between">
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                        {getInitials(task.assignee)}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    {/* Actions Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                          <MoreHorizontal className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onTaskClick(task)}>
+                          Edit Task
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => onTaskDelete(task.id)}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               ))}
             </div>
