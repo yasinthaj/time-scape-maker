@@ -211,7 +211,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
       {/* Main task bar with normal positioning */}
       <div
         data-task-id={task.id}
-        className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
+        className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'}`}
         style={{
           left: Math.max(0, taskStartPos),
           width: Math.max(minWidth, taskWidth),
@@ -230,13 +230,6 @@ const TaskBar: React.FC<TaskBarProps> = ({
           onMouseEnter={() => setHoveredEdge('start')}
           onMouseLeave={() => setHoveredEdge(null)}
         >
-          {/* Vertical Resize Line */}
-          <div
-            className={`absolute left-0 top-0 w-0.5 h-full bg-white/80 transition-all duration-200 ${
-              isHovered ? 'opacity-100' : 'opacity-0'
-            }`}
-          />
-          
           {/* Resize Handle Dot */}
           <div
             className={`absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-white border border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
@@ -246,33 +239,12 @@ const TaskBar: React.FC<TaskBarProps> = ({
           />
         </div>
 
-        {/* Dependency Dot - Left (Completely outside strip) */}
-        <div
-          className={`absolute w-2.5 h-2.5 bg-muted-foreground border border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-sm ${
-            isHovered ? 'opacity-70 scale-100' : 'opacity-0'
-          } hover:scale-125 hover:bg-primary hover:opacity-100`}
-          style={{
-            left: -10, // 10px outside the left edge of task bar
-            top: '50%',
-            transform: 'translateY(-50%)'
-          }}
-          title="Create dependency from this task"
-          onMouseDown={handleDependencyMouseDown}
-        />
-
         {/* Right Edge Area */}
         <div
           className="absolute right-0 top-0 h-full w-4 flex items-center justify-end z-30"
           onMouseEnter={() => setHoveredEdge('end')}
           onMouseLeave={() => setHoveredEdge(null)}
         >
-          {/* Vertical Resize Line */}
-          <div
-            className={`absolute right-0 top-0 w-0.5 h-full bg-white/80 transition-all duration-200 ${
-              isHovered ? 'opacity-100' : 'opacity-0'
-            }`}
-          />
-          
           {/* Resize Handle Dot */}
           <div
             className={`absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-2 h-2 bg-white border border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
@@ -281,20 +253,6 @@ const TaskBar: React.FC<TaskBarProps> = ({
             onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
           />
         </div>
-
-        {/* Dependency Dot - Right (Completely outside strip) */}
-        <div
-          className={`absolute w-2.5 h-2.5 bg-muted-foreground border border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-sm ${
-            isHovered ? 'opacity-70 scale-100' : 'opacity-0'
-          } hover:scale-125 hover:bg-primary hover:opacity-100`}
-          style={{
-            right: -10, // 10px outside the right edge of task bar
-            top: '50%',
-            transform: 'translateY(-50%)'
-          }}
-          title="Create dependency from this task"
-          onMouseDown={handleDependencyMouseDown}
-        />
 
         {/* Center Move Area */}
         <div
@@ -318,6 +276,51 @@ const TaskBar: React.FC<TaskBarProps> = ({
           )}
         </div>
       </div>
+
+      {/* Hover Indicators - Outside the main task bar to prevent flickering */}
+      {isHovered && (
+        <>
+          {/* Left Vertical Line */}
+          <div
+            className="absolute w-0.5 h-8 bg-white/90 shadow-sm transition-all duration-200 pointer-events-none z-40"
+            style={{
+              left: Math.max(0, taskStartPos),
+              top: rowIndex * 48 + 8,
+            }}
+          />
+          
+          {/* Right Vertical Line */}
+          <div
+            className="absolute w-0.5 h-8 bg-white/90 shadow-sm transition-all duration-200 pointer-events-none z-40"
+            style={{
+              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) - 2,
+              top: rowIndex * 48 + 8,
+            }}
+          />
+          
+          {/* Left Dependency Dot */}
+          <div
+            className="absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg hover:scale-125 hover:bg-primary/80 pointer-events-auto"
+            style={{
+              left: Math.max(0, taskStartPos) - 18, // 18px outside the left edge
+              top: rowIndex * 48 + 8 + 16 - 6, // Center vertically
+            }}
+            title="Create dependency from this task"
+            onMouseDown={handleDependencyMouseDown}
+          />
+          
+          {/* Right Dependency Dot */}
+          <div
+            className="absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg hover:scale-125 hover:bg-primary/80 pointer-events-auto"
+            style={{
+              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) + 12, // 12px outside the right edge
+              top: rowIndex * 48 + 8 + 16 - 6, // Center vertically
+            }}
+            title="Create dependency from this task"
+            onMouseDown={handleDependencyMouseDown}
+          />
+        </>
+      )}
 
       {/* Dependency Preview Line */}
       {dependencyPreview && dragType === 'dependency' && (
