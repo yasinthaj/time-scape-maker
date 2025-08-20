@@ -230,42 +230,38 @@ const TaskBar: React.FC<TaskBarProps> = ({
           onMouseEnter={() => setHoveredEdge('start')}
           onMouseLeave={() => setHoveredEdge(null)}
         >
-          {/* Resize Handle */}
+          {/* Vertical Resize Line */}
           <div
-            className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
-              hoveredEdge === 'start' ? 'opacity-100 scale-110' : 'opacity-0'
+            className={`absolute left-0 top-0 w-0.5 h-full bg-white/80 transition-all duration-200 ${
+              hoveredEdge === 'start' || isHovered ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+          
+          {/* Resize Handle Dot */}
+          <div
+            className={`absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
+              hoveredEdge === 'start' ? 'opacity-100 scale-110' : isHovered ? 'opacity-80' : 'opacity-0'
             }`}
             onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
           />
-          
-          {/* Edge Line + Arrow for resize indication */}
-          <div
-            className={`absolute -left-4 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
-              hoveredEdge === 'start' ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <div className="flex items-center">
-              <svg width="12" height="8" className="text-primary">
-                <path d="M8 4L4 2v4l4-2z" fill="currentColor" />
-              </svg>
-              <div className="w-3 h-0.5 bg-primary"></div>
-            </div>
-          </div>
         </div>
 
         {/* Dependency Dot - Left (Completely outside strip) */}
         <div
-          className={`absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
+          className={`absolute w-4 h-4 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
           } hover:scale-125 hover:bg-primary/80`}
           style={{
-            left: -12, // 12px outside the left edge of task bar
+            left: -16, // 16px outside the left edge of task bar
             top: '50%',
             transform: 'translateY(-50%)'
           }}
           title="Create dependency from this task"
           onMouseDown={handleDependencyMouseDown}
-        />
+        >
+          {/* Inner dot for better visibility */}
+          <div className="absolute inset-1 bg-white rounded-full" />
+        </div>
 
         {/* Right Edge Area */}
         <div
@@ -273,42 +269,38 @@ const TaskBar: React.FC<TaskBarProps> = ({
           onMouseEnter={() => setHoveredEdge('end')}
           onMouseLeave={() => setHoveredEdge(null)}
         >
-          {/* Resize Handle */}
+          {/* Vertical Resize Line */}
           <div
-            className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
-              hoveredEdge === 'end' ? 'opacity-100 scale-110' : 'opacity-0'
+            className={`absolute right-0 top-0 w-0.5 h-full bg-white/80 transition-all duration-200 ${
+              hoveredEdge === 'end' || isHovered ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+          
+          {/* Resize Handle Dot */}
+          <div
+            className={`absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-white border-2 border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
+              hoveredEdge === 'end' ? 'opacity-100 scale-110' : isHovered ? 'opacity-80' : 'opacity-0'
             }`}
             onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
           />
-          
-          {/* Edge Line + Arrow for resize indication */}
-          <div
-            className={`absolute -right-4 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
-              hoveredEdge === 'end' ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <div className="flex items-center">
-              <div className="w-3 h-0.5 bg-primary"></div>
-              <svg width="12" height="8" className="text-primary">
-                <path d="M4 4l4-2v4l-4-2z" fill="currentColor" />
-              </svg>
-            </div>
-          </div>
         </div>
 
         {/* Dependency Dot - Right (Completely outside strip) */}
         <div
-          className={`absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
+          className={`absolute w-4 h-4 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
             isHovered ? 'opacity-100 scale-100' : 'opacity-0'
           } hover:scale-125 hover:bg-primary/80`}
           style={{
-            right: -12, // 12px outside the right edge of task bar
+            right: -16, // 16px outside the right edge of task bar
             top: '50%',
             transform: 'translateY(-50%)'
           }}
           title="Create dependency from this task"
           onMouseDown={handleDependencyMouseDown}
-        />
+        >
+          {/* Inner dot for better visibility */}
+          <div className="absolute inset-1 bg-white rounded-full" />
+        </div>
 
         {/* Center Move Area */}
         <div
