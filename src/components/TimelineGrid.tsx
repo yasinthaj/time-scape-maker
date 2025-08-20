@@ -239,8 +239,8 @@ const TaskBar: React.FC<TaskBarProps> = ({
           
           {/* Resize Handle Dot */}
           <div
-            className={`absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
-              hoveredEdge === 'start' ? 'opacity-100 scale-110' : isHovered ? 'opacity-80' : 'opacity-0'
+            className={`absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-white border border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
+              hoveredEdge === 'start' ? 'opacity-100 scale-125' : isHovered ? 'opacity-60' : 'opacity-0'
             }`}
             onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
           />
@@ -248,20 +248,17 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
         {/* Dependency Dot - Left (Completely outside strip) */}
         <div
-          className={`absolute w-4 h-4 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
-            isHovered ? 'opacity-100 scale-100' : 'opacity-0'
-          } hover:scale-125 hover:bg-primary/80`}
+          className={`absolute w-2.5 h-2.5 bg-muted-foreground border border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-sm ${
+            isHovered ? 'opacity-70 scale-100' : 'opacity-0'
+          } hover:scale-125 hover:bg-primary hover:opacity-100`}
           style={{
-            left: -16, // 16px outside the left edge of task bar
+            left: -10, // 10px outside the left edge of task bar
             top: '50%',
             transform: 'translateY(-50%)'
           }}
           title="Create dependency from this task"
           onMouseDown={handleDependencyMouseDown}
-        >
-          {/* Inner dot for better visibility */}
-          <div className="absolute inset-1 bg-white rounded-full" />
-        </div>
+        />
 
         {/* Right Edge Area */}
         <div
@@ -278,8 +275,8 @@ const TaskBar: React.FC<TaskBarProps> = ({
           
           {/* Resize Handle Dot */}
           <div
-            className={`absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-3 h-3 bg-white border-2 border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
-              hoveredEdge === 'end' ? 'opacity-100 scale-110' : isHovered ? 'opacity-80' : 'opacity-0'
+            className={`absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-2 h-2 bg-white border border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
+              hoveredEdge === 'end' ? 'opacity-100 scale-125' : isHovered ? 'opacity-60' : 'opacity-0'
             }`}
             onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
           />
@@ -287,20 +284,17 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
         {/* Dependency Dot - Right (Completely outside strip) */}
         <div
-          className={`absolute w-4 h-4 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
-            isHovered ? 'opacity-100 scale-100' : 'opacity-0'
-          } hover:scale-125 hover:bg-primary/80`}
+          className={`absolute w-2.5 h-2.5 bg-muted-foreground border border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-sm ${
+            isHovered ? 'opacity-70 scale-100' : 'opacity-0'
+          } hover:scale-125 hover:bg-primary hover:opacity-100`}
           style={{
-            right: -16, // 16px outside the right edge of task bar
+            right: -10, // 10px outside the right edge of task bar
             top: '50%',
             transform: 'translateY(-50%)'
           }}
           title="Create dependency from this task"
           onMouseDown={handleDependencyMouseDown}
-        >
-          {/* Inner dot for better visibility */}
-          <div className="absolute inset-1 bg-white rounded-full" />
-        </div>
+        />
 
         {/* Center Move Area */}
         <div
