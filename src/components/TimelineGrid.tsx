@@ -173,10 +173,10 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
       {/* Dependency Dot - Left (Outside strip) */}
       <div
-        className={`absolute -left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-primary border-2 border-white rounded-full cursor-crosshair transition-all duration-200 z-40 ${
-          isHovered ? 'opacity-100 scale-110' : 'opacity-0'
-        }`}
-        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+        className={`absolute -left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
+          isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+        } hover:scale-110 hover:bg-primary/90`}
+        title="Create dependency"
       />
 
       {/* Right Edge Area */}
@@ -210,10 +210,10 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
       {/* Dependency Dot - Right (Outside strip) */}
       <div
-        className={`absolute -right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-primary border-2 border-white rounded-full cursor-crosshair transition-all duration-200 z-40 ${
-          isHovered ? 'opacity-100 scale-110' : 'opacity-0'
-        }`}
-        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+        className={`absolute -right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
+          isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+        } hover:scale-110 hover:bg-primary/90`}
+        title="Create dependency"
       />
 
       {/* Center Move Area */}
