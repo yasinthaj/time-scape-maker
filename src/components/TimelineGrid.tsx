@@ -682,9 +682,10 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 const fromTaskCenterY = headerHeight + fromIndex * rowHeight + taskBarOffset + (taskBarHeight / 2);
                 const toTaskCenterY = headerHeight + toIndex * rowHeight + taskBarOffset + (taskBarHeight / 2);
                 
-                // Connect from right edge of source task to left edge of target task
-                const startX = fromTaskEndPos;
-                const targetX = toTaskStartPos;
+                // Connect from outside the right edge of source task to outside the left edge of target task
+                const arrowPadding = 8; // Distance outside the task bars
+                const startX = fromTaskEndPos + arrowPadding;
+                const targetX = toTaskStartPos - arrowPadding;
                 
                 // Use center Y positions for arrows
                 const fromY = fromTaskCenterY;
