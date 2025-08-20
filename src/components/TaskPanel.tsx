@@ -189,10 +189,8 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                     </div>
                   </ResizablePanel>
                   
-                  {/* Add resize handle between columns (including after last column for TaskPanel resizing) */}
+                  {/* Add resize handle between columns only */}
                   {index < visibleColumnConfigs.length - 1 && <ResizableHandle />}
-                  {/* Add resize handle after last column to allow TaskPanel width adjustment */}
-                  {index === visibleColumnConfigs.length - 1 && <ResizableHandle />}
                 </React.Fragment>
               ))}
             </ResizablePanelGroup>
