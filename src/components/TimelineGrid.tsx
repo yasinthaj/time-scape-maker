@@ -35,19 +35,8 @@ const TaskBar: React.FC<TaskBarProps> = ({
   const taskWidth = Math.max(pixelsPerDay, taskEndPos - taskStartPos + pixelsPerDay);
   const minWidth = pixelsPerDay; // Minimum 1 day
 
-  // Debug logging
-  console.log(`Task ${task.name}:`, {
-    startDate: task.startDate,
-    endDate: task.endDate,
-    taskStartPos,
-    taskEndPos,
-    taskWidth,
-    visible: !(task.endDate < startDate || task.startDate > endDate)
-  });
-
   // Only render if task overlaps with the visible date range
   if (task.endDate < startDate || task.startDate > endDate) {
-    console.log(`Task ${task.name} is outside visible range, not rendering`);
     return null;
   }
 
@@ -240,6 +229,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   onTaskUpdate 
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [hasScrolledToToday, setHasScrolledToToday] = useState(false);
   
   // Calculate date range and pixel scale
   const today = startOfDay(new Date());
@@ -271,12 +261,13 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   const todayPosition = differenceInDays(today, startDate) * pixelsPerDay;
   const totalWidth = dates.length * pixelsPerDay;
 
-  // Scroll to today on mount
+  // Scroll to today on mount - only once
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && !hasScrolledToToday) {
       scrollRef.current.scrollLeft = Math.max(0, todayPosition - 400);
+      setHasScrolledToToday(true);
     }
-  }, [todayPosition]);
+  }, [todayPosition, hasScrolledToToday]);
 
   return (
     <Card className="flex-1 h-full rounded-none border-y-0 border-r-0 overflow-hidden">

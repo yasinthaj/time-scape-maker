@@ -102,18 +102,10 @@ export const TaskDrawer: React.FC<TaskDrawerProps> = ({
       parentId: formData.parentId,
     };
 
-    console.log('Saving task with dates:', {
-      name: taskData.name,
-      startDate: taskData.startDate,
-      endDate: taskData.endDate
-    });
-
     if (task) {
       onTaskUpdate({ ...task, ...taskData });
-      console.log('Updated task:', { ...task, ...taskData });
     } else {
       onTaskCreate(taskData);
-      console.log('Created new task:', taskData);
     }
 
     onClose();
@@ -270,10 +262,7 @@ export const TaskDrawer: React.FC<TaskDrawerProps> = ({
                       <Calendar
                         mode="single"
                         selected={formData.startDate}
-                        onSelect={(date) => {
-                          console.log('Start date selected:', date);
-                          setFormData({ ...formData, startDate: date || new Date() })
-                        }}
+                        onSelect={(date) => setFormData({ ...formData, startDate: date || new Date() })}
                         initialFocus
                       />
                     </PopoverContent>
@@ -303,10 +292,7 @@ export const TaskDrawer: React.FC<TaskDrawerProps> = ({
                       <Calendar
                         mode="single"
                         selected={formData.endDate}
-                        onSelect={(date) => {
-                          console.log('End date selected:', date);
-                          setFormData({ ...formData, endDate: date || new Date() })
-                        }}
+                        onSelect={(date) => setFormData({ ...formData, endDate: date || new Date() })}
                         initialFocus
                       />
                     </PopoverContent>
