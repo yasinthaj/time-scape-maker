@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
+import { X } from 'lucide-react';
 import type { Task, ZoomLevel } from './Timeline';
 import { format, startOfDay, endOfDay, addDays, addWeeks, addMonths, differenceInDays, isToday } from 'date-fns';
 
@@ -421,6 +422,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [hasScrolledToToday, setHasScrolledToToday] = useState(false);
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
+  const [hoveredDependency, setHoveredDependency] = useState<string | null>(null);
 
   const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
     console.log('🔥 HANDLE DEPENDENCY CREATE called:', fromTaskId, '->', toTaskId);
@@ -451,6 +453,16 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
       console.log('📊 New dependencies array:', updated);
       return updated;
     });
+  };
+
+  const handleDependencyDelete = (dependencyId: string) => {
+    console.log('🗑️ Deleting dependency:', dependencyId);
+    setDependencies(prevDeps => {
+      const updated = prevDeps.filter(dep => dep.id !== dependencyId);
+      console.log('📊 Dependencies after deletion:', updated);
+      return updated;
+    });
+    setHoveredDependency(null);
   };
   
   // Calculate date range and pixel scale
@@ -588,7 +600,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             
             {/* Dependency arrows */}
             <svg 
-              className="absolute pointer-events-none z-40" 
+              className="absolute z-40" 
               style={{ 
                 top: 0, 
                 left: 0, 
@@ -670,17 +682,88 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                   pathData = `M ${startX} ${fromY} L ${extendToX} ${fromY} L ${extendToX} ${toY} L ${targetX} ${toY}`;
                 }
 
+                // Calculate midpoint for delete button placement
+                const midX = hasDirectSpace ? 
+                  startX + (targetX - startX) / 2 : 
+                  startX + smallExtension;
+                const midY = (fromY + toY) / 2;
+
+                const isHovered = hoveredDependency === dependency.id;
+
                 return (
-                  <path
-                    key={dependency.id}
-                    d={pathData}
-                    stroke="hsl(var(--muted-foreground))"
-                    strokeWidth="2"
-                    fill="none"
-                    markerEnd="url(#dependency-arrowhead)"
-                    opacity="0.8"
-                    className="transition-opacity hover:opacity-100"
-                  />
+                  <g key={dependency.id}>
+                    {/* Main dependency path */}
+                    <path
+                      d={pathData}
+                      stroke="hsl(var(--muted-foreground))"
+                      strokeWidth="2"
+                      fill="none"
+                      markerEnd="url(#dependency-arrowhead)"
+                      opacity={isHovered ? "1" : "0.8"}
+                      className="transition-all duration-200 cursor-pointer"
+                      onMouseEnter={() => setHoveredDependency(dependency.id)}
+                      onMouseLeave={() => setHoveredDependency(null)}
+                    />
+                    
+                    {/* Invisible hover target for easier interaction */}
+                    <path
+                      d={pathData}
+                      stroke="transparent"
+                      strokeWidth="8"
+                      fill="none"
+                      className="cursor-pointer"
+                      onMouseEnter={() => setHoveredDependency(dependency.id)}
+                      onMouseLeave={() => setHoveredDependency(null)}
+                    />
+                    
+                    {/* Delete button - appears on hover */}
+                    {isHovered && (
+                      <g>
+                        {/* Delete button background */}
+                        <circle
+                          cx={midX}
+                          cy={midY}
+                          r="10"
+                          fill="hsl(var(--background))"
+                          stroke="hsl(var(--muted-foreground))"
+                          strokeWidth="1"
+                          className="animate-scale-in cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDependencyDelete(dependency.id);
+                          }}
+                        />
+                        
+                        {/* X icon */}
+                        <g
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDependencyDelete(dependency.id);
+                          }}
+                        >
+                          <line
+                            x1={midX - 4}
+                            y1={midY - 4}
+                            x2={midX + 4}
+                            y2={midY + 4}
+                            stroke="hsl(var(--muted-foreground))"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                          <line
+                            x1={midX + 4}
+                            y1={midY - 4}
+                            x2={midX - 4}
+                            y2={midY + 4}
+                            stroke="hsl(var(--muted-foreground))"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                        </g>
+                      </g>
+                    )}
+                  </g>
                 );
               })}
             </svg>
