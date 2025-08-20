@@ -30,6 +30,8 @@ const TaskBar: React.FC<TaskBarProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragType, setDragType] = useState<'move' | 'resize-start' | 'resize-end' | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, taskStart: task.startDate, taskEnd: task.endDate });
+  const [hoveredEdge, setHoveredEdge] = useState<'start' | 'end' | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Calculate positions
   const taskStartPos = differenceInDays(task.startDate, startDate) * pixelsPerDay;
@@ -127,42 +129,107 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
   return (
     <div
-      className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 hover:shadow-md hover:z-10 group cursor-pointer ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : ''}`}
+      className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group cursor-pointer ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
       style={{
         left: Math.max(0, taskStartPos),
         width: Math.max(minWidth, taskWidth),
-        top: rowIndex * 48 + 8, // Exactly center the 32px bar within the 48px row
+        top: rowIndex * 48 + 8,
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setHoveredEdge(null);
       }}
       onMouseDown={(e) => handleMouseDown(e, 'move')}
       title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
     >
-      {/* Resize handle - left */}
+      {/* Left Edge Area */}
       <div
-        className="absolute left-0 top-0 h-full w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/30 transition-all duration-200"
-        onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
-      />
+        className="absolute left-0 top-0 h-full w-4 flex items-center justify-start"
+        onMouseEnter={() => setHoveredEdge('start')}
+        onMouseLeave={() => setHoveredEdge(null)}
+      >
+        {/* Resize Handle */}
+        <div
+          className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
+            hoveredEdge === 'start' ? 'opacity-100 scale-110' : 'opacity-0'
+          }`}
+          onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
+        />
+        
+        {/* Edge Line + Arrow */}
+        <div
+          className={`absolute -left-3 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+            hoveredEdge === 'start' ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <div className="flex items-center">
+            <svg width="12" height="8" className="text-white/80">
+              <path d="M8 4L4 2v4l4-2z" fill="currentColor" />
+            </svg>
+            <div className="w-2 h-0.5 bg-white/60"></div>
+          </div>
+        </div>
+        
+        {/* Dependency Dot */}
+        <div
+          className={`absolute -left-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-primary border border-white/40 rounded-full cursor-crosshair transition-all duration-200 ${
+            isHovered ? 'opacity-100 scale-110' : 'opacity-0'
+          }`}
+        />
+      </div>
+
+      {/* Right Edge Area */}
+      <div
+        className="absolute right-0 top-0 h-full w-4 flex items-center justify-end"
+        onMouseEnter={() => setHoveredEdge('end')}
+        onMouseLeave={() => setHoveredEdge(null)}
+      >
+        {/* Resize Handle */}
+        <div
+          className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
+            hoveredEdge === 'end' ? 'opacity-100 scale-110' : 'opacity-0'
+          }`}
+          onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
+        />
+        
+        {/* Edge Line + Arrow */}
+        <div
+          className={`absolute -right-3 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+            hoveredEdge === 'end' ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
+          <div className="flex items-center">
+            <div className="w-2 h-0.5 bg-white/60"></div>
+            <svg width="12" height="8" className="text-white/80">
+              <path d="M4 4l4-2v4l-4-2z" fill="currentColor" />
+            </svg>
+          </div>
+        </div>
+        
+        {/* Dependency Dot */}
+        <div
+          className={`absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-primary border border-white/40 rounded-full cursor-crosshair transition-all duration-200 ${
+            isHovered ? 'opacity-100 scale-110' : 'opacity-0'
+          }`}
+        />
+      </div>
       
       {/* Progress indicator background */}
       {task.progress !== undefined && task.progress > 0 && (
         <div 
-          className="absolute top-0 left-0 h-full bg-white/25 transition-all duration-300"
+          className="absolute top-0 left-0 h-full bg-white/25 transition-all duration-300 rounded-l-sm"
           style={{ width: `${task.progress}%` }}
         />
       )}
       
       {/* Task content */}
-      <div className="px-2 py-1 h-full flex items-center text-white text-sm font-medium relative z-10">
+      <div className="px-4 py-1 h-full flex items-center text-white text-sm font-medium relative z-10">
         <span className="truncate">{task.name}</span>
         {task.progress !== undefined && task.progress > 0 && (
           <span className="ml-1 text-xs opacity-80">({task.progress}%)</span>
         )}
       </div>
-      
-      {/* Resize handle - right */}
-      <div
-        className="absolute right-0 top-0 h-full w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 hover:bg-white/30 transition-all duration-200"
-        onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
-      />
     </div>
   );
 };
