@@ -131,7 +131,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
       style={{
         left: Math.max(0, taskStartPos),
         width: Math.max(minWidth, taskWidth),
-        top: rowIndex * 48 + 8, // Center the 32px bar within the 48px row (8px margin top)
+        top: rowIndex * 48 + 8, // Exactly center the 32px bar within the 48px row
       }}
       onMouseDown={(e) => handleMouseDown(e, 'move')}
       title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
@@ -323,7 +323,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             </div>
             
             {/* Task bars */}
-            <div className="relative" style={{ height: Math.max(tasks.length * 48, 400), minHeight: '100%', top: '80px' }}>
+            <div className="absolute" style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}>
               {tasks.map((task, index) => (
                 <TaskBar
                   key={task.id}
