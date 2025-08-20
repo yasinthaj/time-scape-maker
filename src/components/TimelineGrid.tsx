@@ -628,44 +628,65 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 
                 // Calculate positions with header offset
                 const headerHeight = 80;
+                const rowHeight = 48;
+                const taskHeight = 32;
+                
+                // Calculate exact task positions
+                const fromTaskStartPos = differenceInDays(fromTask.startDate, startDate) * pixelsPerDay;
                 const fromTaskEndPos = differenceInDays(fromTask.endDate, startDate) * pixelsPerDay + pixelsPerDay;
                 const toTaskStartPos = differenceInDays(toTask.startDate, startDate) * pixelsPerDay;
                 
-                const fromY = headerHeight + fromIndex * 48 + 24; // Center of task + header
-                const toY = headerHeight + toIndex * 48 + 24; // Center of task + header
+                // Y positions (center of tasks)
+                const fromY = headerHeight + fromIndex * rowHeight + rowHeight / 2;
+                const toY = headerHeight + toIndex * rowHeight + rowHeight / 2;
                 
-                // Handle overlapping or consecutive tasks
-                const tasksOverlap = fromTaskEndPos >= toTaskStartPos;
-                let startX, endX, pathData;
+                // Start from right edge of source task
+                const startX = fromTaskEndPos;
                 
-                if (tasksOverlap) {
-                  // Tasks overlap or are consecutive - use arc path above/below
-                  const midX = (fromTaskEndPos + toTaskStartPos) / 2;
-                  const isBelow = toIndex > fromIndex;
-                  const arcHeight = Math.abs(toY - fromY) / 2 + 30; // Arc height
+                // ClickUp-style right-angled path
+                let pathData;
+                
+                // Determine if tasks overlap or are adjacent
+                const gap = toTaskStartPos - fromTaskEndPos;
+                const minGap = 20; // Minimum gap needed for straight connection
+                
+                if (gap >= minGap) {
+                  // Tasks have enough space - use simple right-angled path
+                  const midX = startX + gap / 2;
+                  const endX = toTaskStartPos;
                   
-                  // Start from task center, end at task center
-                  startX = fromTaskEndPos - pixelsPerDay / 2;
-                  endX = toTaskStartPos + pixelsPerDay / 2;
-                  
-                  const controlY = isBelow ? Math.max(fromY, toY) + arcHeight : Math.min(fromY, toY) - arcHeight;
-                  
-                  // Create arc path that goes around the overlapping area
-                  pathData = `M ${startX} ${fromY} Q ${midX} ${controlY} ${endX} ${toY}`;
-                } else {
-                  // Normal case - tasks don't overlap
-                  startX = fromTaskEndPos + 2;
-                  endX = toTaskStartPos - 2;
-                  
-                  // Straight or gentle curve for non-overlapping tasks
-                  if (Math.abs(fromY - toY) < 20) {
-                    // Same row or close rows - straight line
+                  if (Math.abs(fromY - toY) < 10) {
+                    // Same row - straight line
                     pathData = `M ${startX} ${fromY} L ${endX} ${toY}`;
                   } else {
-                    // Different rows - curved path
-                    const controlX1 = startX + Math.abs(endX - startX) * 0.3;
-                    const controlX2 = endX - Math.abs(endX - startX) * 0.3;
-                    pathData = `M ${startX} ${fromY} C ${controlX1} ${fromY}, ${controlX2} ${toY}, ${endX} ${toY}`;
+                    // Different rows - right-angled path
+                    pathData = `M ${startX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${endX} ${toY}`;
+                  }
+                } else {
+                  // Tasks overlap or are very close - use extended path
+                  const extension = 15; // How far to extend beyond tasks
+                  const cornerRadius = 8; // Slight rounding for professional look
+                  
+                  // Go right from source task
+                  const rightX = Math.max(fromTaskEndPos + extension, toTaskStartPos + extension);
+                  
+                  // Calculate path with rounded corners like ClickUp
+                  if (fromY === toY) {
+                    // Same row - just extend and come back
+                    pathData = `M ${startX} ${fromY} L ${rightX} ${fromY} L ${rightX} ${toY - cornerRadius} Q ${rightX} ${toY} ${rightX - cornerRadius} ${toY} L ${toTaskStartPos} ${toY}`;
+                  } else {
+                    // Different rows - create proper right-angled path
+                    const isDown = toY > fromY;
+                    const verticalMid = isDown ? toY - cornerRadius : toY + cornerRadius;
+                    
+                    pathData = `
+                      M ${startX} ${fromY} 
+                      L ${rightX - cornerRadius} ${fromY} 
+                      Q ${rightX} ${fromY} ${rightX} ${fromY + (isDown ? cornerRadius : -cornerRadius)}
+                      L ${rightX} ${verticalMid}
+                      Q ${rightX} ${toY} ${rightX - cornerRadius} ${toY}
+                      L ${toTaskStartPos} ${toY}
+                    `.replace(/\s+/g, ' ').trim();
                   }
                 }
 
@@ -674,10 +695,10 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                     key={dependency.id}
                     d={pathData}
                     stroke="hsl(var(--muted-foreground))"
-                    strokeWidth="1.5"
+                    strokeWidth="2"
                     fill="none"
                     markerEnd="url(#dependency-arrowhead)"
-                    opacity="0.7"
+                    opacity="0.8"
                     className="transition-opacity hover:opacity-100"
                   />
                 );
