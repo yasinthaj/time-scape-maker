@@ -64,6 +64,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
   const handleDependencyMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('🎯 DEPENDENCY DRAG STARTED from task:', task.id);
     setIsDragging(true);
     setDragType('dependency');
     setDragStart({ 
@@ -79,6 +80,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
       if (!isDragging || !dragType) return;
 
       if (dragType === 'dependency') {
+        console.log('🖱️ DEPENDENCY DRAG in progress:', e.clientX, e.clientY);
         // Update dependency preview line position
         setDependencyPreview({ x: e.clientX, y: e.clientY });
         return;
@@ -121,12 +123,19 @@ const TaskBar: React.FC<TaskBarProps> = ({
     };
 
     const handleMouseUp = (e: MouseEvent) => {
+      console.log('🛑 MOUSE UP - drag type:', dragType, 'at position:', e.clientX, e.clientY);
+      
       if (dragType === 'dependency') {
-        console.log('Dependency drag ended at:', e.clientX, e.clientY);
+        console.log('🎯 DEPENDENCY DRAG ENDED at:', e.clientX, e.clientY);
         
         // Get all elements at the drop point
         const elements = document.elementsFromPoint(e.clientX, e.clientY);
-        console.log('All elements at drop point:', elements.map(el => el.tagName + (el.className ? '.' + el.className.split(' ').join('.') : '')));
+        console.log('📍 All elements at drop point:', elements.map(el => ({
+          tag: el.tagName,
+          className: el.className,
+          id: el.id,
+          taskId: el.getAttribute('data-task-id')
+        })));
         
         // Look for any element with data-task-id
         let targetTaskId = null;
@@ -134,7 +143,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
           const taskId = element.getAttribute('data-task-id');
           if (taskId && taskId !== task.id) {
             targetTaskId = taskId;
-            console.log('Found target task:', taskId);
+            console.log('✅ Found target task directly:', taskId);
             break;
           }
           // Also check parent elements
@@ -143,17 +152,20 @@ const TaskBar: React.FC<TaskBarProps> = ({
             const parentTaskId = parent.getAttribute('data-task-id');
             if (parentTaskId && parentTaskId !== task.id) {
               targetTaskId = parentTaskId;
-              console.log('Found target task in parent:', parentTaskId);
+              console.log('✅ Found target task in parent:', parentTaskId);
               break;
             }
           }
         }
         
         if (targetTaskId) {
-          console.log('Creating dependency from', task.id, 'to', targetTaskId);
+          console.log('🚀 CREATING DEPENDENCY from', task.id, 'to', targetTaskId);
           onDependencyCreate(task.id, targetTaskId);
         } else {
-          console.log('No valid drop target found - current task:', task.id);
+          console.log('❌ No valid drop target found - source task:', task.id);
+          console.log('💡 Available task IDs on page:', 
+            Array.from(document.querySelectorAll('[data-task-id]')).map(el => el.getAttribute('data-task-id'))
+          );
         }
       }
       
@@ -410,7 +422,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
 
   const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
-    console.log('Creating dependency:', fromTaskId, '->', toTaskId);
+    console.log('🔥 HANDLE DEPENDENCY CREATE called:', fromTaskId, '->', toTaskId);
     
     // Check if dependency already exists
     const existingDep = dependencies.find(dep => 
@@ -418,7 +430,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
     );
     
     if (existingDep) {
-      console.log('Dependency already exists:', existingDep);
+      console.log('⚠️ Dependency already exists:', existingDep);
       return;
     }
     
@@ -427,9 +439,12 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
       fromTaskId,
       toTaskId,
     };
+    
+    console.log('✨ Creating new dependency:', newDependency);
+    
     setDependencies(prev => {
       const updated = [...prev, newDependency];
-      console.log('Dependencies updated:', updated);
+      console.log('📊 Dependencies state updated from', prev.length, 'to', updated.length, ':', updated);
       return updated;
     });
   };
@@ -528,7 +543,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             
             {/* Debug: Dependencies count */}
             <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs z-50">
-              Dependencies: {dependencies.length}
+              Dependencies: {dependencies.length} | Available Tasks: {tasks.length}
             </div>
 
             {/* Task bars */}
