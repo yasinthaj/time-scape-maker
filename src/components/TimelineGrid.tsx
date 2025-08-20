@@ -278,10 +278,13 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               {tasks.map((_, index) => (
                 <div
                   key={index}
-                  className={`absolute left-0 right-0 h-12 ${
+                  className={`absolute left-0 right-0 ${
                     index % 2 === 0 ? 'bg-transparent' : 'bg-muted/20'
                   }`}
-                  style={{ top: index * 48 }}
+                  style={{ 
+                    top: index * 48,
+                    height: 48
+                  }}
                 />
               ))}
             </div>
