@@ -129,7 +129,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
   return (
     <div
-      className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group cursor-pointer ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
+      className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
       style={{
         left: Math.max(0, taskStartPos),
         width: Math.max(minWidth, taskWidth),
@@ -140,12 +140,11 @@ const TaskBar: React.FC<TaskBarProps> = ({
         setIsHovered(false);
         setHoveredEdge(null);
       }}
-      onMouseDown={(e) => handleMouseDown(e, 'move')}
       title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
     >
       {/* Left Edge Area */}
       <div
-        className="absolute left-0 top-0 h-full w-4 flex items-center justify-start"
+        className="absolute left-0 top-0 h-full w-4 flex items-center justify-start z-30"
         onMouseEnter={() => setHoveredEdge('start')}
         onMouseLeave={() => setHoveredEdge(null)}
       >
@@ -170,18 +169,19 @@ const TaskBar: React.FC<TaskBarProps> = ({
             <div className="w-2 h-0.5 bg-white/60"></div>
           </div>
         </div>
-        
-        {/* Dependency Dot */}
-        <div
-          className={`absolute -left-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-primary border border-white/40 rounded-full cursor-crosshair transition-all duration-200 ${
-            isHovered ? 'opacity-100 scale-110' : 'opacity-0'
-          }`}
-        />
       </div>
+
+      {/* Dependency Dot - Left (Outside strip) */}
+      <div
+        className={`absolute -left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-primary border-2 border-white rounded-full cursor-crosshair transition-all duration-200 z-40 ${
+          isHovered ? 'opacity-100 scale-110' : 'opacity-0'
+        }`}
+        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+      />
 
       {/* Right Edge Area */}
       <div
-        className="absolute right-0 top-0 h-full w-4 flex items-center justify-end"
+        className="absolute right-0 top-0 h-full w-4 flex items-center justify-end z-30"
         onMouseEnter={() => setHoveredEdge('end')}
         onMouseLeave={() => setHoveredEdge(null)}
       >
@@ -206,14 +206,21 @@ const TaskBar: React.FC<TaskBarProps> = ({
             </svg>
           </div>
         </div>
-        
-        {/* Dependency Dot */}
-        <div
-          className={`absolute -right-1 top-1/2 transform -translate-y-1/2 w-2 h-2 bg-primary border border-white/40 rounded-full cursor-crosshair transition-all duration-200 ${
-            isHovered ? 'opacity-100 scale-110' : 'opacity-0'
-          }`}
-        />
       </div>
+
+      {/* Dependency Dot - Right (Outside strip) */}
+      <div
+        className={`absolute -right-2 top-1/2 transform -translate-y-1/2 w-3 h-3 bg-primary border-2 border-white rounded-full cursor-crosshair transition-all duration-200 z-40 ${
+          isHovered ? 'opacity-100 scale-110' : 'opacity-0'
+        }`}
+        style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+      />
+
+      {/* Center Move Area */}
+      <div
+        className="absolute left-4 right-4 top-0 h-full cursor-move z-10"
+        onMouseDown={(e) => handleMouseDown(e, 'move')}
+      />
       
       {/* Progress indicator background */}
       {task.progress !== undefined && task.progress > 0 && (
