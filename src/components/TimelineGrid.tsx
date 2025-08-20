@@ -284,48 +284,75 @@ const TaskBar: React.FC<TaskBarProps> = ({
         </div>
       </div>
 
-      {/* Hover Indicators - Only show when actually hovered */}
+      {/* DEBUG: Hover Indicators with Highly Visible Colors */}
       {isHovered && (
         <>
-          {/* Left Vertical Line */}
+          {/* Debug Log */}
+          {console.log(`RENDERING HOVER INDICATORS for task: ${task.name}, isHovered: ${isHovered}, taskStartPos: ${taskStartPos}, rowIndex: ${rowIndex}`)}
+          
+          {/* Left Vertical Line - BRIGHT RED for testing */}
           <div
-            className="absolute w-0.5 h-8 bg-white/90 shadow-sm transition-all duration-200 pointer-events-none z-40"
+            className="absolute bg-red-500 shadow-lg pointer-events-none"
+            style={{
+              width: '4px',
+              height: '40px',
+              left: Math.max(0, taskStartPos) - 2,
+              top: rowIndex * 48 + 4,
+              zIndex: 60,
+            }}
+          />
+          
+          {/* Right Vertical Line - BRIGHT BLUE for testing */}
+          <div
+            className="absolute bg-blue-500 shadow-lg pointer-events-none"
+            style={{
+              width: '4px', 
+              height: '40px',
+              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) - 2,
+              top: rowIndex * 48 + 4,
+              zIndex: 60,
+            }}
+          />
+          
+          {/* Left Dependency Dot - BRIGHT GREEN for testing */}
+          <div
+            className="absolute bg-green-500 border-4 border-black rounded-full cursor-crosshair shadow-xl pointer-events-auto hover:scale-125"
+            style={{
+              width: '16px',
+              height: '16px',
+              left: Math.max(0, taskStartPos) - 24,
+              top: rowIndex * 48 + 16,
+              zIndex: 70,
+            }}
+            title="Create dependency from this task"
+            onMouseDown={handleDependencyMouseDown}
+          />
+          
+          {/* Right Dependency Dot - BRIGHT PURPLE for testing */}
+          <div
+            className="absolute bg-purple-500 border-4 border-black rounded-full cursor-crosshair shadow-xl pointer-events-auto hover:scale-125"
+            style={{
+              width: '16px',
+              height: '16px', 
+              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) + 8,
+              top: rowIndex * 48 + 16,
+              zIndex: 70,
+            }}
+            title="Create dependency from this task"
+            onMouseDown={handleDependencyMouseDown}
+          />
+          
+          {/* Debug Text Indicator */}
+          <div
+            className="absolute bg-yellow-300 text-black text-sm px-2 py-1 pointer-events-none border-2 border-black"
             style={{
               left: Math.max(0, taskStartPos),
-              top: rowIndex * 48 + 8,
+              top: rowIndex * 48 - 25,
+              zIndex: 80,
             }}
-          />
-          
-          {/* Right Vertical Line */}
-          <div
-            className="absolute w-0.5 h-8 bg-white/90 shadow-sm transition-all duration-200 pointer-events-none z-40"
-            style={{
-              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) - 2,
-              top: rowIndex * 48 + 8,
-            }}
-          />
-          
-          {/* Left Dependency Dot */}
-          <div
-            className="absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg hover:scale-125 hover:bg-primary/80 pointer-events-auto"
-            style={{
-              left: Math.max(0, taskStartPos) - 18,
-              top: rowIndex * 48 + 8 + 16 - 6,
-            }}
-            title="Create dependency from this task"
-            onMouseDown={handleDependencyMouseDown}
-          />
-          
-          {/* Right Dependency Dot */}
-          <div
-            className="absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg hover:scale-125 hover:bg-primary/80 pointer-events-auto"
-            style={{
-              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) + 12,
-              top: rowIndex * 48 + 8 + 16 - 6,
-            }}
-            title="Create dependency from this task"
-            onMouseDown={handleDependencyMouseDown}
-          />
+          >
+            HOVER ACTIVE: {task.name}
+          </div>
         </>
       )}
 
