@@ -28,10 +28,11 @@ const TaskBar: React.FC<TaskBarProps> = ({
 }) => {
   // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY EARLY RETURNS
   const [isDragging, setIsDragging] = useState(false);
-  const [dragType, setDragType] = useState<'move' | 'resize-start' | 'resize-end' | null>(null);
-  const [dragStart, setDragStart] = useState({ x: 0, taskStart: task.startDate, taskEnd: task.endDate });
+  const [dragType, setDragType] = useState<'move' | 'resize-start' | 'resize-end' | 'dependency' | null>(null);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, taskStart: task.startDate, taskEnd: task.endDate });
   const [hoveredEdge, setHoveredEdge] = useState<'start' | 'end' | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [dependencyPreview, setDependencyPreview] = useState<{ x: number; y: number } | null>(null);
 
   // Calculate positions
   const taskStartPos = differenceInDays(task.startDate, startDate) * pixelsPerDay;
@@ -46,6 +47,20 @@ const TaskBar: React.FC<TaskBarProps> = ({
     setDragType(type);
     setDragStart({ 
       x: e.clientX, 
+      y: e.clientY,
+      taskStart: task.startDate, 
+      taskEnd: task.endDate 
+    });
+  };
+
+  const handleDependencyMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    setDragType('dependency');
+    setDragStart({ 
+      x: e.clientX, 
+      y: e.clientY,
       taskStart: task.startDate, 
       taskEnd: task.endDate 
     });
@@ -54,6 +69,12 @@ const TaskBar: React.FC<TaskBarProps> = ({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging || !dragType) return;
+
+      if (dragType === 'dependency') {
+        // Update dependency preview line position
+        setDependencyPreview({ x: e.clientX, y: e.clientY });
+        return;
+      }
 
       const deltaX = e.clientX - dragStart.x;
       const daysDelta = Math.round(deltaX / pixelsPerDay);
@@ -91,9 +112,20 @@ const TaskBar: React.FC<TaskBarProps> = ({
       }
     };
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+      if (dragType === 'dependency') {
+        // Check if dropped on another task
+        const element = document.elementFromPoint(e.clientX, e.clientY);
+        const taskElement = element?.closest('[data-task-id]');
+        if (taskElement && taskElement.getAttribute('data-task-id') !== task.id) {
+          console.log(`Create dependency from ${task.id} to ${taskElement.getAttribute('data-task-id')}`);
+          // Here you would call a callback to create the dependency
+        }
+      }
+      
       setIsDragging(false);
       setDragType(null);
+      setDependencyPreview(null);
     };
 
     if (isDragging) {
@@ -128,116 +160,137 @@ const TaskBar: React.FC<TaskBarProps> = ({
   }
 
   return (
-    <div
-      className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
-      style={{
-        left: Math.max(0, taskStartPos),
-        width: Math.max(minWidth, taskWidth),
-        top: rowIndex * 48 + 8,
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setHoveredEdge(null);
-      }}
-      title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
-    >
-      {/* Left Edge Area */}
+    <>
       <div
-        className="absolute left-0 top-0 h-full w-4 flex items-center justify-start z-30"
-        onMouseEnter={() => setHoveredEdge('start')}
-        onMouseLeave={() => setHoveredEdge(null)}
+        data-task-id={task.id}
+        className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
+        style={{
+          left: Math.max(0, taskStartPos),
+          width: Math.max(minWidth, taskWidth),
+          top: rowIndex * 48 + 8,
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setHoveredEdge(null);
+        }}
+        title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
       >
-        {/* Resize Handle */}
+        {/* Left Edge Area */}
         <div
-          className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
-            hoveredEdge === 'start' ? 'opacity-100 scale-110' : 'opacity-0'
-          }`}
-          onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
-        />
-        
-        {/* Edge Line + Arrow */}
-        <div
-          className={`absolute -left-3 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
-            hoveredEdge === 'start' ? 'opacity-100' : 'opacity-0'
-          }`}
+          className="absolute left-0 top-0 h-full w-4 flex items-center justify-start z-30"
+          onMouseEnter={() => setHoveredEdge('start')}
+          onMouseLeave={() => setHoveredEdge(null)}
         >
-          <div className="flex items-center">
-            <svg width="12" height="8" className="text-white/80">
-              <path d="M8 4L4 2v4l4-2z" fill="currentColor" />
-            </svg>
-            <div className="w-2 h-0.5 bg-white/60"></div>
+          {/* Resize Handle */}
+          <div
+            className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
+              hoveredEdge === 'start' ? 'opacity-100 scale-110' : 'opacity-0'
+            }`}
+            onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
+          />
+          
+          {/* Edge Line + Arrow */}
+          <div
+            className={`absolute -left-3 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+              hoveredEdge === 'start' ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div className="flex items-center">
+              <svg width="12" height="8" className="text-white/80">
+                <path d="M8 4L4 2v4l4-2z" fill="currentColor" />
+              </svg>
+              <div className="w-2 h-0.5 bg-white/60"></div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Dependency Dot - Left (Outside strip) */}
-      <div
-        className={`absolute -left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
-          isHovered ? 'opacity-100 scale-100' : 'opacity-0'
-        } hover:scale-110 hover:bg-primary/90`}
-        title="Create dependency"
-      />
-
-      {/* Right Edge Area */}
-      <div
-        className="absolute right-0 top-0 h-full w-4 flex items-center justify-end z-30"
-        onMouseEnter={() => setHoveredEdge('end')}
-        onMouseLeave={() => setHoveredEdge(null)}
-      >
-        {/* Resize Handle */}
+        {/* Dependency Dot - Left (Outside strip) */}
         <div
-          className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
-            hoveredEdge === 'end' ? 'opacity-100 scale-110' : 'opacity-0'
-          }`}
-          onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
+          className={`absolute -left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
+            isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+          } hover:scale-110 hover:bg-muted-foreground/80`}
+          title="Create dependency"
+          onMouseDown={handleDependencyMouseDown}
         />
-        
-        {/* Edge Line + Arrow */}
+
+        {/* Right Edge Area */}
         <div
-          className={`absolute -right-3 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
-            hoveredEdge === 'end' ? 'opacity-100' : 'opacity-0'
-          }`}
+          className="absolute right-0 top-0 h-full w-4 flex items-center justify-end z-30"
+          onMouseEnter={() => setHoveredEdge('end')}
+          onMouseLeave={() => setHoveredEdge(null)}
         >
-          <div className="flex items-center">
-            <div className="w-2 h-0.5 bg-white/60"></div>
-            <svg width="12" height="8" className="text-white/80">
-              <path d="M4 4l4-2v4l-4-2z" fill="currentColor" />
-            </svg>
+          {/* Resize Handle */}
+          <div
+            className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
+              hoveredEdge === 'end' ? 'opacity-100 scale-110' : 'opacity-0'
+            }`}
+            onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
+          />
+          
+          {/* Edge Line + Arrow */}
+          <div
+            className={`absolute -right-3 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+              hoveredEdge === 'end' ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div className="flex items-center">
+              <div className="w-2 h-0.5 bg-white/60"></div>
+              <svg width="12" height="8" className="text-white/80">
+                <path d="M4 4l4-2v4l-4-2z" fill="currentColor" />
+              </svg>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Dependency Dot - Right (Outside strip) */}
-      <div
-        className={`absolute -right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
-          isHovered ? 'opacity-100 scale-100' : 'opacity-0'
-        } hover:scale-110 hover:bg-primary/90`}
-        title="Create dependency"
-      />
-
-      {/* Center Move Area */}
-      <div
-        className="absolute left-4 right-4 top-0 h-full cursor-move z-10"
-        onMouseDown={(e) => handleMouseDown(e, 'move')}
-      />
-      
-      {/* Progress indicator background */}
-      {task.progress !== undefined && task.progress > 0 && (
-        <div 
-          className="absolute top-0 left-0 h-full bg-white/25 transition-all duration-300 rounded-l-sm"
-          style={{ width: `${task.progress}%` }}
+        {/* Dependency Dot - Right (Outside strip) */}
+        <div
+          className={`absolute -right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-40 shadow-md ${
+            isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+          } hover:scale-110 hover:bg-muted-foreground/80`}
+          title="Create dependency"
+          onMouseDown={handleDependencyMouseDown}
         />
-      )}
-      
-      {/* Task content */}
-      <div className="px-4 py-1 h-full flex items-center text-white text-sm font-medium relative z-10">
-        <span className="truncate">{task.name}</span>
+
+        {/* Center Move Area */}
+        <div
+          className="absolute left-4 right-4 top-0 h-full cursor-move z-10"
+          onMouseDown={(e) => handleMouseDown(e, 'move')}
+        />
+        
+        {/* Progress indicator background */}
         {task.progress !== undefined && task.progress > 0 && (
-          <span className="ml-1 text-xs opacity-80">({task.progress}%)</span>
+          <div 
+            className="absolute top-0 left-0 h-full bg-white/25 transition-all duration-300 rounded-l-sm"
+            style={{ width: `${task.progress}%` }}
+          />
         )}
+        
+        {/* Task content */}
+        <div className="px-4 py-1 h-full flex items-center text-white text-sm font-medium relative z-10">
+          <span className="truncate">{task.name}</span>
+          {task.progress !== undefined && task.progress > 0 && (
+            <span className="ml-1 text-xs opacity-80">({task.progress}%)</span>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Dependency Preview Line */}
+      {dependencyPreview && dragType === 'dependency' && (
+        <svg className="fixed top-0 left-0 w-full h-full pointer-events-none z-50">
+          <line
+            x1={dragStart.x}
+            y1={dragStart.y}
+            x2={dependencyPreview.x}
+            y2={dependencyPreview.y}
+            stroke="hsl(var(--muted-foreground))"
+            strokeWidth="2"
+            strokeDasharray="5,5"
+            className="drop-shadow-sm"
+          />
+        </svg>
+      )}
+    </>
   );
 };
 
