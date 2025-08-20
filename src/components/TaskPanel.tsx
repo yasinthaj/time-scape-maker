@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import type { Task } from './Timeline';
+import { TaskColumnConfig, availableColumns, type ColumnId } from './TaskColumnConfig';
 
 interface TaskPanelProps {
   tasks: Task[];
@@ -29,6 +30,7 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
   onTaskDelete,
 }) => {
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
+  const [visibleColumns, setVisibleColumns] = useState<ColumnId[]>(['name', 'assignee']);
 
   const getInitials = (name: string) => {
     return name
@@ -48,6 +50,12 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
     }
     setSelectedTasks(newSelected);
   };
+
+  const getColumnConfig = (columnId: ColumnId) => {
+    return availableColumns.find(col => col.id === columnId);
+  };
+
+  const visibleColumnConfigs = visibleColumns.map(id => getColumnConfig(id)).filter(Boolean);
 
   return (
     <Card className="w-96 h-full rounded-none border-r border-y-0 border-l-0 bg-card">
@@ -93,100 +101,98 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
           {/* Resizable Content Columns */}
           <div className="flex-1">
             <ResizablePanelGroup direction="horizontal" className="h-full">
-              {/* Name Column */}
-              <ResizablePanel defaultSize={70} minSize={30}>
-                <div className="h-full flex flex-col">
-                  {/* Name Header */}
-                  <div className="px-4 py-3 border-b border-r bg-muted/30 flex items-center" style={{ height: '80px' }}>
-                    <h3 className="font-semibold text-sm text-foreground">Name</h3>
-                  </div>
-                  
-                  {/* Name Content */}
-                  <div className="flex-1 overflow-y-auto">
-                    {tasks.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground">
-                        <p>No tasks to display</p>
-                        <p className="text-sm">Try adjusting your filters</p>
+              {visibleColumnConfigs.map((column, index) => (
+                <React.Fragment key={column!.id}>
+                  <ResizablePanel 
+                    defaultSize={column!.width} 
+                    minSize={column!.minWidth}
+                  >
+                    <div className="h-full flex flex-col">
+                      {/* Column Header */}
+                      <div className="px-4 py-3 border-b border-r bg-muted/30 flex items-center justify-between" style={{ height: '80px' }}>
+                        <h3 className="font-semibold text-sm text-foreground">{column!.label}</h3>
+                        {column!.id === visibleColumns[visibleColumns.length - 1] && (
+                          <TaskColumnConfig 
+                            visibleColumns={visibleColumns}
+                            onColumnsChange={setVisibleColumns}
+                          />
+                        )}
                       </div>
-                    ) : (
-                      <div>
-                        {tasks.map((task) => (
-                          <div 
-                            key={`name-${task.id}`}
-                            className={`px-4 py-2 border-b border-r flex items-center hover:bg-muted/50 transition-colors ${
-                              selectedTasks.has(task.id) ? 'bg-muted/30' : ''
-                            }`}
-                            style={{ height: '48px' }}
-                          >
-                            <button
-                              onClick={() => onTaskClick(task)}
-                              className="text-left hover:text-primary transition-colors text-sm font-medium text-foreground w-full"
-                            >
-                              {task.name}
-                            </button>
+                      
+                      {/* Column Content */}
+                      <div className="flex-1 overflow-y-auto">
+                        {tasks.length === 0 ? (
+                          column!.id === 'name' ? (
+                            <div className="p-8 text-center text-muted-foreground">
+                              <p>No tasks to display</p>
+                              <p className="text-sm">Try adjusting your filters</p>
+                            </div>
+                          ) : null
+                        ) : (
+                          <div>
+                            {tasks.map((task) => (
+                              <div 
+                                key={`${column!.id}-${task.id}`}
+                                className={`px-4 py-2 border-b border-r flex items-center hover:bg-muted/50 transition-colors ${
+                                  selectedTasks.has(task.id) ? 'bg-muted/30' : ''
+                                } ${column!.id === 'assignee' ? 'justify-between' : ''}`}
+                                style={{ height: '48px' }}
+                              >
+                                {column!.id === 'name' ? (
+                                  <button
+                                    onClick={() => onTaskClick(task)}
+                                    className="text-left hover:text-primary transition-colors w-full"
+                                  >
+                                    {column!.render(task)}
+                                  </button>
+                                ) : column!.id === 'assignee' ? (
+                                  <>
+                                    <Avatar className="h-6 w-6">
+                                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                        {getInitials(task.assignee)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    
+                                    {/* Actions Menu - only show on last column */}
+                                    {column!.id === visibleColumns[visibleColumns.length - 1] && (
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                            <MoreHorizontal className="h-3 w-3" />
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                          <DropdownMenuItem onClick={() => onTaskClick(task)}>
+                                            Edit Task
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem 
+                                            onClick={() => onTaskDelete(task.id)}
+                                            className="text-destructive"
+                                          >
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Delete
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    )}
+                                  </>
+                                ) : (
+                                  <div className="w-full">
+                                    {column!.render(task)}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
-              </ResizablePanel>
-              
-              <ResizableHandle />
-              
-              {/* Assignee Column */}
-              <ResizablePanel defaultSize={30} minSize={20}>
-                <div className="h-full flex flex-col">
-                  {/* Assignee Header */}
-                  <div className="px-4 py-3 border-b bg-muted/30 flex items-center" style={{ height: '80px' }}>
-                    <h3 className="font-semibold text-sm text-foreground">Assignee</h3>
-                  </div>
+                    </div>
+                  </ResizablePanel>
                   
-                  {/* Assignee Content */}
-                  <div className="flex-1 overflow-y-auto">
-                    {tasks.length === 0 ? null : (
-                      <div>
-                        {tasks.map((task) => (
-                          <div 
-                            key={`assignee-${task.id}`}
-                            className={`px-2 py-2 border-b flex items-center justify-between hover:bg-muted/50 transition-colors ${
-                              selectedTasks.has(task.id) ? 'bg-muted/30' : ''
-                            }`}
-                            style={{ height: '48px' }}
-                          >
-                            <Avatar className="h-6 w-6">
-                              <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                                {getInitials(task.assignee)}
-                              </AvatarFallback>
-                            </Avatar>
-                            
-                            {/* Actions Menu */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                  <MoreHorizontal className="h-3 w-3" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => onTaskClick(task)}>
-                                  Edit Task
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => onTaskDelete(task.id)}
-                                  className="text-destructive"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </ResizablePanel>
+                  {/* Add resize handle between columns (except after last column) */}
+                  {index < visibleColumnConfigs.length - 1 && <ResizableHandle />}
+                </React.Fragment>
+              ))}
             </ResizablePanelGroup>
           </div>
         </div>
