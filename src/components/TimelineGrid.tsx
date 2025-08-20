@@ -629,12 +629,11 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 // Calculate positions with header offset
                 const headerHeight = 80;
                 const rowHeight = 48;
-                const taskHeight = 32;
                 
                 // Calculate exact task positions
-                const fromTaskStartPos = differenceInDays(fromTask.startDate, startDate) * pixelsPerDay;
                 const fromTaskEndPos = differenceInDays(fromTask.endDate, startDate) * pixelsPerDay + pixelsPerDay;
                 const toTaskStartPos = differenceInDays(toTask.startDate, startDate) * pixelsPerDay;
+                const toTaskEndPos = differenceInDays(toTask.endDate, startDate) * pixelsPerDay + pixelsPerDay;
                 
                 // Y positions (center of tasks)
                 const fromY = headerHeight + fromIndex * rowHeight + rowHeight / 2;
@@ -642,51 +641,37 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 
                 // Start from right edge of source task
                 const startX = fromTaskEndPos;
+                const targetX = toTaskStartPos;
                 
-                // ClickUp-style right-angled path
                 let pathData;
                 
-                // Determine if tasks overlap or are adjacent
-                const gap = toTaskStartPos - fromTaskEndPos;
-                const minGap = 20; // Minimum gap needed for straight connection
+                // ClickUp logic: Check if we need to go around
+                const isOverlapping = startX >= targetX;
+                const gap = targetX - startX;
                 
-                if (gap >= minGap) {
-                  // Tasks have enough space - use simple right-angled path
-                  const midX = startX + gap / 2;
-                  const endX = toTaskStartPos;
-                  
-                  if (Math.abs(fromY - toY) < 10) {
-                    // Same row - straight line
-                    pathData = `M ${startX} ${fromY} L ${endX} ${toY}`;
+                if (!isOverlapping && gap >= 30) {
+                  // Normal case - enough space between tasks
+                  if (Math.abs(fromY - toY) <= 5) {
+                    // Same row - direct line
+                    pathData = `M ${startX} ${fromY} L ${targetX} ${toY}`;
                   } else {
-                    // Different rows - right-angled path
-                    pathData = `M ${startX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${endX} ${toY}`;
+                    // Different rows - simple right angle
+                    const midX = startX + gap / 2;
+                    pathData = `M ${startX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${targetX} ${toY}`;
                   }
                 } else {
-                  // Tasks overlap or are very close - use extended path
-                  const extension = 15; // How far to extend beyond tasks
-                  const cornerRadius = 8; // Slight rounding for professional look
+                  // Overlapping or tight spacing - extend around like ClickUp
+                  // Calculate how far to extend beyond both tasks
+                  const extensionDistance = Math.max(30, Math.abs(toTaskEndPos - startX) + 20);
+                  const extensionX = Math.max(startX, toTaskEndPos) + extensionDistance;
                   
-                  // Go right from source task
-                  const rightX = Math.max(fromTaskEndPos + extension, toTaskStartPos + extension);
-                  
-                  // Calculate path with rounded corners like ClickUp
-                  if (fromY === toY) {
-                    // Same row - just extend and come back
-                    pathData = `M ${startX} ${fromY} L ${rightX} ${fromY} L ${rightX} ${toY - cornerRadius} Q ${rightX} ${toY} ${rightX - cornerRadius} ${toY} L ${toTaskStartPos} ${toY}`;
+                  if (Math.abs(fromY - toY) <= 5) {
+                    // Same row - extend right, then come back
+                    pathData = `M ${startX} ${fromY} L ${extensionX} ${fromY} L ${extensionX} ${toY} L ${targetX} ${toY}`;
                   } else {
-                    // Different rows - create proper right-angled path
-                    const isDown = toY > fromY;
-                    const verticalMid = isDown ? toY - cornerRadius : toY + cornerRadius;
-                    
-                    pathData = `
-                      M ${startX} ${fromY} 
-                      L ${rightX - cornerRadius} ${fromY} 
-                      Q ${rightX} ${fromY} ${rightX} ${fromY + (isDown ? cornerRadius : -cornerRadius)}
-                      L ${rightX} ${verticalMid}
-                      Q ${rightX} ${toY} ${rightX - cornerRadius} ${toY}
-                      L ${toTaskStartPos} ${toY}
-                    `.replace(/\s+/g, ' ').trim();
+                    // Different rows - ClickUp style path
+                    // Go right from source, down/up to target level, then left to target
+                    pathData = `M ${startX} ${fromY} L ${extensionX} ${fromY} L ${extensionX} ${toY} L ${targetX} ${toY}`;
                   }
                 }
 
