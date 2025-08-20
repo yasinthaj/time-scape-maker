@@ -217,8 +217,8 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   
   // Calculate date range and pixel scale
   const today = startOfDay(new Date());
-  const startDate = addDays(today, -30); // Start 30 days ago
-  const endDate = addDays(today, 90); // End 90 days from now
+  const startDate = addDays(today, -60); // Start 60 days ago
+  const endDate = addDays(today, 180); // End 180 days from now
   
   const pixelsPerDay = zoomLevel === 'day' ? 120 : zoomLevel === 'week' ? 60 : 40;
   
@@ -243,17 +243,30 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
 
   // Today line position
   const todayPosition = differenceInDays(today, startDate) * pixelsPerDay;
+  const totalWidth = dates.length * pixelsPerDay;
+
+  // Scroll to today on mount
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = Math.max(0, todayPosition - 400);
+    }
+  }, [todayPosition]);
 
   return (
-    <Card className="flex-1 h-full rounded-none border-y-0 border-r-0">
+    <Card className="flex-1 h-full rounded-none border-y-0 border-r-0 overflow-hidden">
       <div className="h-full flex flex-col">
-        {/* Date Header */}
-        <DateHeader dates={dates} zoomLevel={zoomLevel} />
+        {/* Date Header - Sticky */}
+        <div className="relative z-20">
+          <DateHeader dates={dates} zoomLevel={zoomLevel} />
+        </div>
         
-        {/* Timeline Grid */}
-        <div ref={scrollRef} className="flex-1 overflow-auto relative">
-          {/* Grid Background */}
-          <div className="relative" style={{ width: dates.length * pixelsPerDay }}>
+        {/* Timeline Grid - Scrollable */}
+        <div 
+          ref={scrollRef} 
+          className="flex-1 overflow-x-auto overflow-y-auto relative"
+          style={{ scrollbarWidth: 'thin' }}
+        >
+          <div className="relative" style={{ width: totalWidth, minHeight: '100%' }}>
             {/* Grid lines */}
             <div className="absolute inset-y-0 flex">
               {dates.map((date, index) => (
@@ -290,7 +303,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             </div>
             
             {/* Task bars */}
-            <div className="relative" style={{ height: tasks.length * 48 + 24 }}>
+            <div className="relative" style={{ height: Math.max(tasks.length * 48, 400) }}>
               {tasks.map((task, index) => (
                 <TaskBar
                   key={task.id}
