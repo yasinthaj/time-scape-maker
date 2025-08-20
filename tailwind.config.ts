@@ -26,7 +26,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -51,6 +52,17 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				timeline: {
+					grid: 'hsl(var(--timeline-grid))',
+					today: 'hsl(var(--timeline-today))',
+					panel: 'hsl(var(--task-panel-bg))'
+				},
+				task: {
+					default: 'hsl(var(--task-bar-default))',
+					progress: 'hsl(var(--task-bar-in-progress))',
+					completed: 'hsl(var(--task-bar-completed))',
+					overdue: 'hsl(var(--task-bar-overdue))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
