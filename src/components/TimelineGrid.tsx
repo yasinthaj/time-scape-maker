@@ -24,6 +24,8 @@ interface TaskBarProps {
   onTaskUpdate: (task: Task) => void;
   onDependencyCreate: (fromTaskId: string, toTaskId: string) => void;
   rowIndex: number;
+  isHovered: boolean;
+  onHover: (taskId: string | null) => void;
 }
 
 const TaskBar: React.FC<TaskBarProps> = ({ 
@@ -33,14 +35,15 @@ const TaskBar: React.FC<TaskBarProps> = ({
   pixelsPerDay, 
   onTaskUpdate,
   onDependencyCreate,
-  rowIndex 
+  rowIndex,
+  isHovered,
+  onHover
 }) => {
   // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY EARLY RETURNS
   const [isDragging, setIsDragging] = useState(false);
   const [dragType, setDragType] = useState<'move' | 'resize-start' | 'resize-end' | 'dependency' | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, taskStart: task.startDate, taskEnd: task.endDate });
   const [hoveredEdge, setHoveredEdge] = useState<'start' | 'end' | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
   const [dependencyPreview, setDependencyPreview] = useState<{ x: number; y: number } | null>(null);
 
   // Calculate positions
@@ -217,9 +220,13 @@ const TaskBar: React.FC<TaskBarProps> = ({
           width: Math.max(minWidth, taskWidth),
           top: rowIndex * 48 + 8,
         }}
-        onMouseEnter={() => setIsHovered(true)}
+        onMouseEnter={() => {
+          console.log('🖱️ HOVER ENTER:', task.name);
+          onHover(task.id);
+        }}
         onMouseLeave={() => {
-          setIsHovered(false);
+          console.log('🖱️ HOVER LEAVE:', task.name);
+          onHover(null);
           setHoveredEdge(null);
         }}
         title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
@@ -423,6 +430,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   const [hasScrolledToToday, setHasScrolledToToday] = useState(false);
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
   const [hoveredDependency, setHoveredDependency] = useState<string | null>(null);
+  const [hoveredTask, setHoveredTask] = useState<string | null>(null);
 
   const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
     console.log('🔥 HANDLE DEPENDENCY CREATE called:', fromTaskId, '->', toTaskId);
@@ -575,7 +583,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
 
             {/* Task bars */}
             <div className="absolute" style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}>
-              {tasks.map((task, index) => (
+               {tasks.map((task, index) => (
                  <TaskBar
                    key={task.id}
                    task={task}
@@ -585,8 +593,10 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                    onTaskUpdate={onTaskUpdate}
                    onDependencyCreate={handleDependencyCreate}
                    rowIndex={index}
+                   isHovered={hoveredTask === task.id}
+                   onHover={setHoveredTask}
                  />
-              ))}
+               ))}
             </div>
             
             {/* Debug: Dependencies list */}
