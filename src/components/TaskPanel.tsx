@@ -58,7 +58,7 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
   const visibleColumnConfigs = visibleColumns.map(id => getColumnConfig(id)).filter(Boolean);
 
   return (
-    <Card className="w-96 h-full rounded-none border-r border-y-0 border-l-0 bg-card">
+    <Card className="w-full h-full rounded-none border-r border-y-0 border-l-0 bg-card">
       <CardContent className="p-0 h-full">
         <div className="flex h-full">
           {/* Checkbox Column */}
@@ -189,8 +189,10 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                     </div>
                   </ResizablePanel>
                   
-                  {/* Add resize handle between columns (except after last column) */}
+                  {/* Add resize handle between columns (including after last column for TaskPanel resizing) */}
                   {index < visibleColumnConfigs.length - 1 && <ResizableHandle />}
+                  {/* Add resize handle after last column to allow TaskPanel width adjustment */}
+                  {index === visibleColumnConfigs.length - 1 && <ResizableHandle />}
                 </React.Fragment>
               ))}
             </ResizablePanelGroup>
