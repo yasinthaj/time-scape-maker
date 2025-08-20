@@ -282,7 +282,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
         <>
           {/* Left Vertical Line */}
           <div
-            className="absolute w-0.5 h-8 bg-white/90 shadow-sm transition-all duration-200 pointer-events-none z-40"
+            className="absolute w-1 h-8 bg-red-500 shadow-sm transition-all duration-200 pointer-events-none z-40"
             style={{
               left: Math.max(0, taskStartPos),
               top: rowIndex * 48 + 8,
@@ -291,7 +291,7 @@ const TaskBar: React.FC<TaskBarProps> = ({
           
           {/* Right Vertical Line */}
           <div
-            className="absolute w-0.5 h-8 bg-white/90 shadow-sm transition-all duration-200 pointer-events-none z-40"
+            className="absolute w-1 h-8 bg-red-500 shadow-sm transition-all duration-200 pointer-events-none z-40"
             style={{
               left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) - 2,
               top: rowIndex * 48 + 8,
@@ -300,10 +300,10 @@ const TaskBar: React.FC<TaskBarProps> = ({
           
           {/* Left Dependency Dot */}
           <div
-            className="absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg hover:scale-125 hover:bg-primary/80 pointer-events-auto"
+            className="absolute w-4 h-4 bg-red-500 border-2 border-white rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg hover:scale-125 pointer-events-auto"
             style={{
-              left: Math.max(0, taskStartPos) - 18, // 18px outside the left edge
-              top: rowIndex * 48 + 8 + 16 - 6, // Center vertically
+              left: Math.max(0, taskStartPos) - 20, // 20px outside the left edge
+              top: rowIndex * 48 + 8 + 16 - 8, // Center vertically
             }}
             title="Create dependency from this task"
             onMouseDown={handleDependencyMouseDown}
@@ -311,14 +311,25 @@ const TaskBar: React.FC<TaskBarProps> = ({
           
           {/* Right Dependency Dot */}
           <div
-            className="absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg hover:scale-125 hover:bg-primary/80 pointer-events-auto"
+            className="absolute w-4 h-4 bg-red-500 border-2 border-white rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg hover:scale-125 pointer-events-auto"
             style={{
-              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) + 12, // 12px outside the right edge
-              top: rowIndex * 48 + 8 + 16 - 6, // Center vertically
+              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) + 4, // 4px outside the right edge
+              top: rowIndex * 48 + 8 + 16 - 8, // Center vertically
             }}
             title="Create dependency from this task"
             onMouseDown={handleDependencyMouseDown}
           />
+          
+          {/* Debug indicator */}
+          <div
+            className="absolute bg-yellow-400 text-black text-xs px-1 pointer-events-none z-50"
+            style={{
+              left: Math.max(0, taskStartPos),
+              top: rowIndex * 48 - 20,
+            }}
+          >
+            HOVERED: {task.name}
+          </div>
         </>
       )}
 
