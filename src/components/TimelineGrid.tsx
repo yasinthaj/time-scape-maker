@@ -24,8 +24,6 @@ interface TaskBarProps {
   onTaskUpdate: (task: Task) => void;
   onDependencyCreate: (fromTaskId: string, toTaskId: string) => void;
   rowIndex: number;
-  isHovered: boolean;
-  onHover: (taskId: string | null) => void;
 }
 
 const TaskBar: React.FC<TaskBarProps> = ({ 
@@ -35,15 +33,14 @@ const TaskBar: React.FC<TaskBarProps> = ({
   pixelsPerDay, 
   onTaskUpdate,
   onDependencyCreate,
-  rowIndex,
-  isHovered,
-  onHover
+  rowIndex 
 }) => {
   // ALL HOOKS MUST BE CALLED FIRST - BEFORE ANY EARLY RETURNS
   const [isDragging, setIsDragging] = useState(false);
   const [dragType, setDragType] = useState<'move' | 'resize-start' | 'resize-end' | 'dependency' | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, taskStart: task.startDate, taskEnd: task.endDate });
   const [hoveredEdge, setHoveredEdge] = useState<'start' | 'end' | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
   const [dependencyPreview, setDependencyPreview] = useState<{ x: number; y: number } | null>(null);
 
   // Calculate positions
@@ -211,26 +208,20 @@ const TaskBar: React.FC<TaskBarProps> = ({
 
   return (
     <>
-      {/* Main task bar */}
+      {/* Main task bar with normal positioning */}
       <div
         data-task-id={task.id}
-        className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'}`}
+        className={`absolute h-8 rounded-sm shadow-sm transition-all duration-200 group ${getStatusColor(task.status)} ${isDragging ? 'z-20 shadow-lg' : 'hover:shadow-md hover:z-10'} ${isHovered ? 'ring-1 ring-white/20' : ''}`}
         style={{
           left: Math.max(0, taskStartPos),
           width: Math.max(minWidth, taskWidth),
           top: rowIndex * 48 + 8,
         }}
-        onMouseOver={() => {
-          console.log('🖱️ MOUSE OVER:', task.name);
-          onHover(task.id);
-        }}
-        onMouseOut={() => {
-          console.log('🖱️ MOUSE OUT:', task.name);
-          onHover(null);
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
           setHoveredEdge(null);
         }}
-        onMouseMove={() => console.log('🖱️ MOUSE MOVE:', task.name)}
-        onClick={() => console.log('🖱️ CLICK:', task.name)}
         title={`${task.name} (${format(task.startDate, 'MMM d')} - ${format(task.endDate, 'MMM d')})`}
       >
         {/* Left Edge Area */}
@@ -239,14 +230,42 @@ const TaskBar: React.FC<TaskBarProps> = ({
           onMouseEnter={() => setHoveredEdge('start')}
           onMouseLeave={() => setHoveredEdge(null)}
         >
-          {/* Resize Handle Dot */}
+          {/* Resize Handle */}
           <div
-            className={`absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-2 h-2 bg-white border border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
-              hoveredEdge === 'start' ? 'opacity-100 scale-125' : isHovered ? 'opacity-60' : 'opacity-0'
+            className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
+              hoveredEdge === 'start' ? 'opacity-100 scale-110' : 'opacity-0'
             }`}
             onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
           />
+          
+          {/* Edge Line + Arrow for resize indication */}
+          <div
+            className={`absolute -left-4 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+              hoveredEdge === 'start' ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div className="flex items-center">
+              <svg width="12" height="8" className="text-primary">
+                <path d="M8 4L4 2v4l4-2z" fill="currentColor" />
+              </svg>
+              <div className="w-3 h-0.5 bg-primary"></div>
+            </div>
+          </div>
         </div>
+
+        {/* Dependency Dot - Left (Completely outside strip) */}
+        <div
+          className={`absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
+            isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+          } hover:scale-125 hover:bg-primary/80`}
+          style={{
+            left: -12, // 12px outside the left edge of task bar
+            top: '50%',
+            transform: 'translateY(-50%)'
+          }}
+          title="Create dependency from this task"
+          onMouseDown={handleDependencyMouseDown}
+        />
 
         {/* Right Edge Area */}
         <div
@@ -254,20 +273,48 @@ const TaskBar: React.FC<TaskBarProps> = ({
           onMouseEnter={() => setHoveredEdge('end')}
           onMouseLeave={() => setHoveredEdge(null)}
         >
-          {/* Resize Handle Dot */}
+          {/* Resize Handle */}
           <div
-            className={`absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-2 h-2 bg-white border border-primary rounded-full cursor-ew-resize transition-all duration-200 shadow-sm ${
-              hoveredEdge === 'end' ? 'opacity-100 scale-125' : isHovered ? 'opacity-60' : 'opacity-0'
+            className={`w-1 h-4 bg-white/60 rounded-full cursor-ew-resize transition-all duration-200 ${
+              hoveredEdge === 'end' ? 'opacity-100 scale-110' : 'opacity-0'
             }`}
             onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
           />
+          
+          {/* Edge Line + Arrow for resize indication */}
+          <div
+            className={`absolute -right-4 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+              hoveredEdge === 'end' ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div className="flex items-center">
+              <div className="w-3 h-0.5 bg-primary"></div>
+              <svg width="12" height="8" className="text-primary">
+                <path d="M4 4l4-2v4l-4-2z" fill="currentColor" />
+              </svg>
+            </div>
+          </div>
         </div>
 
-         {/* Center Move Area */}
-         <div
-           className="absolute left-4 right-4 top-0 h-full cursor-move z-10"
-           onMouseDown={(e) => handleMouseDown(e, 'move')}
-         />
+        {/* Dependency Dot - Right (Completely outside strip) */}
+        <div
+          className={`absolute w-3 h-3 bg-primary border-2 border-background rounded-full cursor-crosshair transition-all duration-200 z-50 shadow-lg ${
+            isHovered ? 'opacity-100 scale-100' : 'opacity-0'
+          } hover:scale-125 hover:bg-primary/80`}
+          style={{
+            right: -12, // 12px outside the right edge of task bar
+            top: '50%',
+            transform: 'translateY(-50%)'
+          }}
+          title="Create dependency from this task"
+          onMouseDown={handleDependencyMouseDown}
+        />
+
+        {/* Center Move Area */}
+        <div
+          className="absolute left-4 right-4 top-0 h-full cursor-move z-10"
+          onMouseDown={(e) => handleMouseDown(e, 'move')}
+        />
         
         {/* Progress indicator background */}
         {task.progress !== undefined && task.progress > 0 && (
@@ -285,67 +332,6 @@ const TaskBar: React.FC<TaskBarProps> = ({
           )}
         </div>
       </div>
-
-      {/* Hover Indicators */}
-      {isHovered && (
-        <>
-          {/* Left Resize Line */}
-          <div
-            className="absolute bg-primary/80 shadow-md pointer-events-auto cursor-ew-resize transition-all duration-200"
-            style={{
-              width: '3px',
-              height: '36px',
-              left: Math.max(0, taskStartPos) - 1.5,
-              top: rowIndex * 48 + 6,
-              zIndex: 60,
-            }}
-            onMouseDown={(e) => handleMouseDown(e, 'resize-start')}
-            title="Resize task start"
-          />
-          
-          {/* Right Resize Line */}
-          <div
-            className="absolute bg-primary/80 shadow-md pointer-events-auto cursor-ew-resize transition-all duration-200"
-            style={{
-              width: '3px', 
-              height: '36px',
-              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) - 1.5,
-              top: rowIndex * 48 + 6,
-              zIndex: 60,
-            }}
-            onMouseDown={(e) => handleMouseDown(e, 'resize-end')}
-            title="Resize task end"
-          />
-          
-          {/* Left Dependency Dot */}
-          <div
-            className="absolute bg-primary border-2 border-background rounded-full cursor-crosshair shadow-lg pointer-events-auto hover:scale-125 transition-all duration-200"
-            style={{
-              width: '12px',
-              height: '12px',
-              left: Math.max(0, taskStartPos) - 20,
-              top: rowIndex * 48 + 18,
-              zIndex: 70,
-            }}
-            title="Create dependency from this task"
-            onMouseDown={handleDependencyMouseDown}
-          />
-          
-          {/* Right Dependency Dot */}
-          <div
-            className="absolute bg-primary border-2 border-background rounded-full cursor-crosshair shadow-lg pointer-events-auto hover:scale-125 transition-all duration-200"
-            style={{
-              width: '12px',
-              height: '12px', 
-              left: Math.max(0, taskStartPos) + Math.max(minWidth, taskWidth) + 8,
-              top: rowIndex * 48 + 18,
-              zIndex: 70,
-            }}
-            title="Create dependency from this task"
-            onMouseDown={handleDependencyMouseDown}
-          />
-        </>
-      )}
 
       {/* Dependency Preview Line */}
       {dependencyPreview && dragType === 'dependency' && (
@@ -437,7 +423,6 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   const [hasScrolledToToday, setHasScrolledToToday] = useState(false);
   const [dependencies, setDependencies] = useState<Dependency[]>([]);
   const [hoveredDependency, setHoveredDependency] = useState<string | null>(null);
-  const [hoveredTask, setHoveredTask] = useState<string | null>(null);
 
   const handleDependencyCreate = (fromTaskId: string, toTaskId: string) => {
     console.log('🔥 HANDLE DEPENDENCY CREATE called:', fromTaskId, '->', toTaskId);
@@ -572,27 +557,6 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               ))}
             </div>
             
-            {/* Task bars */}
-            <div className="absolute" style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}>
-               {tasks.map((task, index) => (
-                 <TaskBar
-                   key={task.id}
-                   task={task}
-                   startDate={startDate}
-                   endDate={endDate}
-                   pixelsPerDay={pixelsPerDay}
-                   onTaskUpdate={onTaskUpdate}
-                   onDependencyCreate={handleDependencyCreate}
-                   rowIndex={index}
-                    isHovered={hoveredTask === task.id}
-                    onHover={(taskId) => {
-                      console.log('🎯 TimelineGrid received hover event:', taskId);
-                      setHoveredTask(taskId);
-                    }}
-                 />
-               ))}
-            </div>
-            
             {/* Debug: Dependencies count and controls */}
             <div className="absolute top-2 right-2 z-50 space-y-1">
               <div className="bg-primary text-primary-foreground px-2 py-1 rounded text-xs">
@@ -609,6 +573,22 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
               </button>
             </div>
 
+            {/* Task bars */}
+            <div className="absolute" style={{ top: '80px', left: 0, right: 0, height: Math.max(tasks.length * 48, 400) }}>
+              {tasks.map((task, index) => (
+                 <TaskBar
+                   key={task.id}
+                   task={task}
+                   startDate={startDate}
+                   endDate={endDate}
+                   pixelsPerDay={pixelsPerDay}
+                   onTaskUpdate={onTaskUpdate}
+                   onDependencyCreate={handleDependencyCreate}
+                   rowIndex={index}
+                 />
+              ))}
+            </div>
+            
             {/* Debug: Dependencies list */}
             {dependencies.length > 0 && (
               <div className="absolute top-10 right-2 bg-secondary text-secondary-foreground px-2 py-1 rounded text-xs z-50 max-w-xs">
@@ -674,10 +654,9 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 const fromTaskCenterY = headerHeight + fromIndex * rowHeight + taskBarOffset + (taskBarHeight / 2);
                 const toTaskCenterY = headerHeight + toIndex * rowHeight + taskBarOffset + (taskBarHeight / 2);
                 
-                // Connect from outside the right edge of source task to outside the left edge of target task
-                const arrowPadding = 8; // Distance outside the task bars
-                const startX = fromTaskEndPos + arrowPadding;
-                const targetX = toTaskStartPos - arrowPadding;
+                // Connect from right edge of source task to left edge of target task
+                const startX = fromTaskEndPos;
+                const targetX = toTaskStartPos;
                 
                 // Use center Y positions for arrows
                 const fromY = fromTaskCenterY;
