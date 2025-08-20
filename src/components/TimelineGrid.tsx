@@ -287,9 +287,6 @@ const TaskBar: React.FC<TaskBarProps> = ({
       {/* DEBUG: Hover Indicators with Highly Visible Colors */}
       {isHovered && (
         <>
-          {/* Debug Log */}
-          {console.log(`RENDERING HOVER INDICATORS for task: ${task.name}, isHovered: ${isHovered}, taskStartPos: ${taskStartPos}, rowIndex: ${rowIndex}`)}
-          
           {/* Left Vertical Line - BRIGHT RED for testing */}
           <div
             className="absolute bg-red-500 shadow-lg pointer-events-none"
