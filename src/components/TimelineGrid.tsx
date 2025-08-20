@@ -665,64 +665,35 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                 
                 let pathData;
                 
-                // ClickUp-style dependency arrows - route around task bars
-                const minExtension = 20; // Minimum extension from task edges
-                const taskHeight = 32;
-                const taskVerticalPadding = 8; // Space above/below task bars in each row
+                // ClickUp-style dependency arrows with better logic
+                const minGapForDirect = 15; // Minimum gap for direct connection
+                const smallExtension = 15; // Small extension for overlapping tasks
                 
-                // Calculate task boundaries to avoid crossing through them
-                const fromTaskBottom = fromTaskCenterY + (taskHeight / 2);
-                const fromTaskTop = fromTaskCenterY - (taskHeight / 2);
-                const toTaskBottom = toTaskCenterY + (taskHeight / 2);
-                const toTaskTop = toTaskCenterY - (taskHeight / 2);
+                // Check if there's enough space for a direct connection
+                const hasDirectSpace = targetX > startX && (targetX - startX) >= minGapForDirect;
                 
-                // Determine if we need to route above or below tasks
-                const routeAbove = fromIndex < toIndex; // Route above if going down
-                const routeBelow = fromIndex > toIndex; // Route below if going up
-                
-                // Calculate routing Y position - either above or below the task bars
-                let routingY;
-                if (Math.abs(fromIndex - toIndex) <= 1) {
-                  // Adjacent rows or same row - route in the gap between rows
-                  if (fromIndex === toIndex) {
-                    // Same row - route slightly above the task
-                    routingY = fromTaskTop - taskVerticalPadding;
-                  } else if (routeAbove) {
-                    // Route in the gap above the lower task
-                    routingY = Math.max(fromTaskBottom, toTaskBottom) + taskVerticalPadding;
-                  } else {
-                    // Route in the gap below the upper task  
-                    routingY = Math.min(fromTaskTop, toTaskTop) - taskVerticalPadding;
-                  }
-                } else {
-                  // Multiple rows apart - route in the middle space
-                  const minY = Math.min(fromTaskCenterY, toTaskCenterY);
-                  const maxY = Math.max(fromTaskCenterY, toTaskCenterY);
-                  routingY = minY + (maxY - minY) / 2;
-                }
-                
-                // Calculate horizontal routing points
-                const fromExtendX = startX + minExtension;
-                const toExtendX = targetX - minExtension;
-                
-                // Create path that routes around task bars
-                if (targetX > startX + minExtension) {
-                  // Target is far enough to the right - direct routing
+                if (hasDirectSpace) {
+                  // Direct connection possible
                   if (Math.abs(fromY - toY) <= 5) {
-                    // Same row - straight line but slightly above task
-                    pathData = `M ${startX} ${fromY} L ${fromExtendX} ${fromY} L ${fromExtendX} ${routingY} L ${toExtendX} ${routingY} L ${toExtendX} ${toY} L ${targetX} ${toY}`;
+                    // Same row - straight line
+                    pathData = `M ${startX} ${fromY} L ${targetX} ${toY}`;
                   } else {
-                    // Different rows - route around
-                    pathData = `M ${startX} ${fromY} L ${fromExtendX} ${fromY} L ${fromExtendX} ${routingY} L ${toExtendX} ${routingY} L ${toExtendX} ${toY} L ${targetX} ${toY}`;
+                    // Different rows - right angle
+                    const cornerX = startX + (targetX - startX) / 2;
+                    pathData = `M ${startX} ${fromY} L ${cornerX} ${fromY} L ${cornerX} ${toY} L ${targetX} ${toY}`;
                   }
                 } else {
-                  // Target overlaps or is to the left - route around
-                  const clearanceX = Math.max(fromTaskEndPos, toTaskEndPos) + minExtension;
-                  pathData = `M ${startX} ${fromY} L ${fromExtendX} ${fromY} L ${fromExtendX} ${routingY} L ${clearanceX} ${routingY} L ${clearanceX} ${toY} L ${targetX} ${toY}`;
+                  // Tasks overlap or are too close - use minimal extension
+                  const extendToX = startX + smallExtension;
+                  
+                  // Create path: right → down/up → left
+                  pathData = `M ${startX} ${fromY} L ${extendToX} ${fromY} L ${extendToX} ${toY} L ${targetX} ${toY}`;
                 }
 
                 // Calculate midpoint for delete button placement
-                const midX = (fromExtendX + toExtendX) / 2;
+                const midX = hasDirectSpace ? 
+                  startX + (targetX - startX) / 2 : 
+                  startX + smallExtension;
                 const midY = (fromY + toY) / 2;
 
                 const isHovered = hoveredDependency === dependency.id;
