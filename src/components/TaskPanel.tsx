@@ -51,11 +51,12 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
 
   return (
     <Card className="w-96 h-full rounded-none border-r border-y-0 border-l-0 bg-card">
-      <CardContent className="p-0 h-full flex flex-col">
-        {/* Header */}
-        <div className="border-b bg-muted/30 sticky top-0 z-10" style={{ height: '80px' }}>
-          <div className="flex h-full">
-            <div className="w-8 p-2 border-r flex items-center justify-center">
+      <CardContent className="p-0 h-full">
+        <div className="flex h-full">
+          {/* Checkbox Column */}
+          <div className="w-8 border-r flex flex-col">
+            {/* Header Checkbox */}
+            <div className="p-2 border-b bg-muted/30 flex items-center justify-center" style={{ height: '80px' }}>
               <Checkbox 
                 checked={selectedTasks.size === tasks.length && tasks.length > 0}
                 onCheckedChange={(checked) => {
@@ -67,54 +68,56 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                 }}
               />
             </div>
-            <div className="flex-1">
-              <ResizablePanelGroup direction="horizontal" className="h-full">
-                <ResizablePanel defaultSize={70} minSize={30}>
-                  <div className="px-4 py-3 h-full flex items-center border-r">
-                    <h3 className="font-semibold text-sm text-foreground">Name</h3>
-                  </div>
-                </ResizablePanel>
-                <ResizableHandle />
-                <ResizablePanel defaultSize={30} minSize={20}>
-                  <div className="px-4 py-3 h-full flex items-center">
-                    <h3 className="font-semibold text-sm text-foreground">Assignee</h3>
-                  </div>
-                </ResizablePanel>
-              </ResizablePanelGroup>
-            </div>
-          </div>
-        </div>
-
-        {/* Task List */}
-        <div className="flex-1 overflow-y-auto">
-          {tasks.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <p>No tasks to display</p>
-              <p className="text-sm">Try adjusting your filters</p>
-            </div>
-          ) : (
-            <div>
-              {tasks.map((task, index) => (
-                <div 
-                  key={task.id} 
-                  className={`border-b hover:bg-muted/50 transition-colors ${
-                    selectedTasks.has(task.id) ? 'bg-muted/30' : ''
-                  }`}
-                  style={{ height: '48px' }}
-                >
-                  <div className="flex h-full">
-                    {/* Checkbox */}
-                    <div className="w-8 p-2 border-r flex items-center justify-center">
+            
+            {/* Task Checkboxes */}
+            <div className="flex-1 overflow-y-auto">
+              {tasks.length === 0 ? null : (
+                <div>
+                  {tasks.map((task) => (
+                    <div 
+                      key={`checkbox-${task.id}`}
+                      className="p-2 border-b flex items-center justify-center"
+                      style={{ height: '48px' }}
+                    >
                       <Checkbox 
                         checked={selectedTasks.has(task.id)}
                         onCheckedChange={(checked) => handleTaskSelection(task.id, !!checked)}
                       />
                     </div>
-                    
-                    <div className="flex-1">
-                      <ResizablePanelGroup direction="horizontal" className="h-full">
-                        <ResizablePanel defaultSize={70} minSize={30}>
-                          <div className="px-4 py-2 h-full flex items-center border-r">
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Resizable Content Columns */}
+          <div className="flex-1">
+            <ResizablePanelGroup direction="horizontal" className="h-full">
+              {/* Name Column */}
+              <ResizablePanel defaultSize={70} minSize={30}>
+                <div className="h-full flex flex-col">
+                  {/* Name Header */}
+                  <div className="px-4 py-3 border-b border-r bg-muted/30 flex items-center" style={{ height: '80px' }}>
+                    <h3 className="font-semibold text-sm text-foreground">Name</h3>
+                  </div>
+                  
+                  {/* Name Content */}
+                  <div className="flex-1 overflow-y-auto">
+                    {tasks.length === 0 ? (
+                      <div className="p-8 text-center text-muted-foreground">
+                        <p>No tasks to display</p>
+                        <p className="text-sm">Try adjusting your filters</p>
+                      </div>
+                    ) : (
+                      <div>
+                        {tasks.map((task) => (
+                          <div 
+                            key={`name-${task.id}`}
+                            className={`px-4 py-2 border-b border-r flex items-center hover:bg-muted/50 transition-colors ${
+                              selectedTasks.has(task.id) ? 'bg-muted/30' : ''
+                            }`}
+                            style={{ height: '48px' }}
+                          >
                             <button
                               onClick={() => onTaskClick(task)}
                               className="text-left hover:text-primary transition-colors text-sm font-medium text-foreground w-full"
@@ -122,10 +125,35 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                               {task.name}
                             </button>
                           </div>
-                        </ResizablePanel>
-                        <ResizableHandle />
-                        <ResizablePanel defaultSize={30} minSize={20}>
-                          <div className="px-2 py-2 h-full flex items-center justify-between">
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle />
+              
+              {/* Assignee Column */}
+              <ResizablePanel defaultSize={30} minSize={20}>
+                <div className="h-full flex flex-col">
+                  {/* Assignee Header */}
+                  <div className="px-4 py-3 border-b bg-muted/30 flex items-center" style={{ height: '80px' }}>
+                    <h3 className="font-semibold text-sm text-foreground">Assignee</h3>
+                  </div>
+                  
+                  {/* Assignee Content */}
+                  <div className="flex-1 overflow-y-auto">
+                    {tasks.length === 0 ? null : (
+                      <div>
+                        {tasks.map((task) => (
+                          <div 
+                            key={`assignee-${task.id}`}
+                            className={`px-2 py-2 border-b flex items-center justify-between hover:bg-muted/50 transition-colors ${
+                              selectedTasks.has(task.id) ? 'bg-muted/30' : ''
+                            }`}
+                            style={{ height: '48px' }}
+                          >
                             <Avatar className="h-6 w-6">
                               <AvatarFallback className="text-xs bg-primary/10 text-primary">
                                 {getInitials(task.assignee)}
@@ -153,14 +181,14 @@ export const TaskPanel: React.FC<TaskPanelProps> = ({
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                        </ResizablePanel>
-                      </ResizablePanelGroup>
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
         </div>
       </CardContent>
     </Card>
