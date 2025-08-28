@@ -173,7 +173,7 @@ export const Timeline: React.FC = () => {
             />
           </ResizablePanel>
           
-          <ResizableHandle withHandle />
+          <ResizableHandle withHandle className="bg-border hover:bg-primary/20 transition-colors" />
           
           {/* Timeline Grid */}
           <ResizablePanel defaultSize={70} minSize={50}>
